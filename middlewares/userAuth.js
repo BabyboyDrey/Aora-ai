@@ -9,7 +9,6 @@ module.exports = user1Auth = asyncErrCatcher(async (req, res, next) => {
     if (!userToken) {
       return res.status(403).json("Forbidden Access");
     }
-    console.log("tok:", userToken);
 
     const verified_user = jwt.verify(userToken, process.env.JWT_SECRET);
 

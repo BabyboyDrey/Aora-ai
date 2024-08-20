@@ -21,10 +21,11 @@ router.post(
       let found_user;
       if (items.phone_number) {
         found_user = await Users.findOne({ phone_number: items.phone_number });
+        console.log("lop:", found_user);
         if (!found_user) {
           return res.status(403).json({
             error: true,
-            message: "User already exists with this phone number",
+            message: "User does not exist with this phone number",
           });
         }
       }
@@ -35,7 +36,7 @@ router.post(
         if (!found_user) {
           return res.status(403).json({
             error: true,
-            message: "User already exists with this email address",
+            message: "User does not exist with this email address",
           });
         }
       }

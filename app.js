@@ -6,6 +6,7 @@ const path = require("path");
 const passport = require("./utils/passport.js");
 const session = require("express-session");
 const userRoutes = require("./controllers/users");
+const brandProfileRoutes = require("./controllers/brandProfile.js");
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use(passport.session());
 
 app.use("/", express.static("uploads"));
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/brandProfile", brandProfileRoutes);
 connectDb();
 
 process.on("uncaughtException", (err) => {

@@ -13,11 +13,9 @@ const sendMail = async (options) => {
     },
   });
 
-  // Read and compile the HTML template
   const templatePath = path.resolve("./views/activation_template.html");
   let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
-  // Replace placeholders with actual data
   htmlTemplate = htmlTemplate
     .replace("{{userName}}", options.context.userName)
     .replace("{{activationCode}}", options.context.activationCode);
@@ -26,7 +24,7 @@ const sendMail = async (options) => {
     from: process.env.SMTP_MAIL,
     to: options.email,
     subject: options.subject,
-    html: htmlTemplate, // Use the compiled HTML content
+    html: htmlTemplate,
   };
 
   await transporter.sendMail(mailOptions);

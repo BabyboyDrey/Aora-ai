@@ -61,11 +61,6 @@ app.get("/", (req, res) => {
   res.send(req.user ? req.user : "Login pls");
 });
 
-app.get("/set-test-cookie", (req, res) => {
-  res.cookie("testCookie", "testValue", { maxAge: 900000, httpOnly: true });
-  res.send("Test cookie set");
-});
-
 app.get("/dice", (req, res) => {
   res.send("Url of ngrok functional");
 });

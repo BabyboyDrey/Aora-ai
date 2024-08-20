@@ -19,7 +19,7 @@ const sendSmsVerificationCode = async (phoneNumber, verificationCode) => {
 
     const message = await client.messages.create({
       body: `Your verification code is: ${verificationCode}`,
-      from: process.env.TWILIO_PHONE_NUMBER, // Your Twilio phone number
+      from: process.env.TWILIO_PHONE_NUMBER,
       to: formattedPhoneNumber,
     });
     return message;

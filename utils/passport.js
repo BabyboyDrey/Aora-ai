@@ -15,8 +15,9 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         console.log("Facebook profile:", profile);
-        const { id, emails, name } = profile;
+        const { id, emails, name, photos } = profile;
         const email = emails && emails.length > 0 ? emails[0].value : null;
+        const picture = photos && photos.length > 0 ? photos[0].value : null;
 
         let user = await Users.findOne({ facebookId: id });
 
@@ -27,6 +28,7 @@ passport.use(
             user = await Users.create({
               facebookId: id,
               email_address: email,
+              avatar: picture,
               full_name: `${name.givenName} ${name.familyName}`,
             });
           } else {

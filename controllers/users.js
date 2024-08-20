@@ -8,6 +8,10 @@ const userAuthToken = require("../utils/userAuthToken.js");
 const sendMail = require("../utils/sendMail.js");
 const sendSmsVerificationCode = require("../utils/sendSms.js");
 const passport = require("../utils/passport.js");
+const { upload } = require("../multer/multer_image.js");
+const mongoose = require("mongoose");
+const checkAndDeleteFile = require("../utils/checkAndDeleteFile.js");
+const userAuth = require("../middlewares/userAuth.js");
 
 router.post(
   "/login",
@@ -425,6 +429,73 @@ router.get(
         message: "Logged out successfully",
       });
     });
+  })
+);
+
+router.put(
+  "/update-user-avatar/:id",
+  upload.single("avatar"),
+  userAuth,
+  asyncErrCatcher(async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        await new Promise((resolve, reject) => {
+          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+        return res.status(400).json({
+          error: true,
+          message: "Invalid ID format",
+        });
+      }
+
+      const user = await Users.findById(id);
+      if (!user) {
+        await new Promise((resolve, reject) => {
+          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+        return res.status(404).json({
+          error: true,
+          message: "No user with this ID",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          error: true,
+          message: "No file sent",
+        });
+      }
+
+      user.avatar = req.file.filename;
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "User avatar updated successfully",
+        avatar: user.avatar,
+      });
+    } catch (err) {
+      await new Promise((resolve, reject) => {
+        checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+      console.error(err);
+      res.status(500).json({
+        error: true,
+        message: err.message,
+      });
+    }
   })
 );
 

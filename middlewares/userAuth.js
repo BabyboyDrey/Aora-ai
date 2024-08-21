@@ -16,12 +16,15 @@ module.exports = user1Auth = asyncErrCatcher(async (req, res, next) => {
     console.log("req.user:", req.user);
     next();
   } catch (err) {
-    await new Promise((resolve, reject) => {
-      checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-        if (err) reject(err);
-        else resolve();
+    if (req.file) {
+      await new Promise((resolve, reject) => {
+        checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
       });
-    });
+    }
+
     res.status(500).json(`Err Message: ${err}`);
   }
 });

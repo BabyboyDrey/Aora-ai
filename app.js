@@ -10,7 +10,7 @@ const brandProfileRoutes = require("./controllers/brandProfile.js");
 
 const app = express();
 
-if (process.env.NODE_ENV !== "Production") {
+if (process.env.NODE_ENV !== "production") {
   require("dotenv").config({
     path: ".env",
   });
@@ -18,17 +18,21 @@ if (process.env.NODE_ENV !== "Production") {
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:5173",
+      "https://b9fngmgw-5002.euw.devtunnels.ms/",
+    ],
     credentials: true,
   })
 );
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(express.json());
 app.use(
   session({
-    secret: "lovedeathrobot",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
   })
@@ -40,6 +44,7 @@ app.use("/", express.static("uploads"));
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/brandProfile", brandProfileRoutes);
 connectDb();
+app.options("*", cors());
 
 process.on("uncaughtException", (err) => {
   console.log(`Uncaught Exception Err: ${err}`);
@@ -52,6 +57,36 @@ process.on("unhandledRejection", (err) => {
   server.close(() => {
     process.exit(1);
   });
+});
+
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received: closing server");
+  server.close(() => {
+    console.log("Server closed");
+    process.exit(0);
+  });
+});
+
+process.on("SIGINT", () => {
+  console.log("SIGINT signal received: closing server");
+  server.close(() => {
+    console.log("Server closed");
+    process.exit(0);
+  });
+});
+
+process.on("warning", (warning) => {
+  console.warn(
+    `Warning: ${warning.name} - ${warning.message}\n${warning.stack}`
+  );
+});
+
+process.on("rejectionHandled", (promise) => {
+  console.log("Promise rejection handled:", promise);
+});
+
+process.on("beforeExit", (code) => {
+  console.log("Process before Exit event with code:", code);
 });
 
 // app.get('*', (req, res) => {

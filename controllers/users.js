@@ -169,7 +169,7 @@ router.post(
       if (!tempUser) {
         return res.status(400).json({
           error: true,
-          message: "No user found",
+          message: "Invalid or expired verification code",
         });
       }
       if (tempUser.verificationCode !== code) {
@@ -220,7 +220,7 @@ router.post(
       if (!verifiedCode) {
         return res.status(400).json({
           error: true,
-          message: "No user found",
+          message: "Invalid or expired verification code",
         });
       }
       if (verifiedCode.verificationCode !== code) {

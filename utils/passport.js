@@ -2,8 +2,27 @@ const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const WechatStrategy = require("passport-wechat").Strategy;
 const expressSession = require("express-session");
+const OAuthToken = require("../models/oauthToken.js");
 const Users = require("../models/users");
 require("dotenv").config();
+
+async function saveOAuthToken(
+  userId,
+  accessToken,
+  refreshToken,
+  expiresAt,
+  provider
+) {
+  await OAuthToken.deleteMany({ userId, provider });
+  const token = new OAuthToken({
+    userId,
+    accessToken,
+    refreshToken,
+    expiresAt,
+    provider,
+  });
+  await token.save();
+}
 
 passport.use(
   new FacebookStrategy(
@@ -38,6 +57,14 @@ passport.use(
           }
         }
 
+        await saveOAuthToken(
+          user._id,
+          accessToken,
+          refreshToken,
+          new Date(Date.now() + 8 * 60 * 60 * 1000),
+          "facebook"
+        );
+
         return done(null, user);
       } catch (error) {
         return done(error, null);
@@ -70,7 +97,13 @@ passport.use(
             avatar: headimgurl,
           });
         }
-
+        await saveOAuthToken(
+          user._id,
+          accessToken,
+          refreshToken,
+          new Date(Date.now() + 8 * 60 * 60 * 1000),
+          "wechat"
+        );
         return done(null, user);
       } catch (error) {
         return done(error, null);

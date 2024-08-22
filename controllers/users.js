@@ -12,6 +12,7 @@ const { upload } = require("../multer/multer_image.js");
 const mongoose = require("mongoose");
 const checkAndDeleteFile = require("../utils/checkAndDeleteFile.js");
 const userAuth = require("../middlewares/userAuth.js");
+const OAuthToken = require("../models/oauthToken.js");
 
 router.post(
   "/login",
@@ -401,36 +402,61 @@ router.get(
   }
 );
 
+router.get("/auth/wechat", passport.authenticate("wechat"));
+
+router.get(
+  "/auth/wechat/callback",
+  passport.authenticate("wechat", {
+    failureRedirect: "/",
+  }),
+  (req, res) => {
+    console.log("WeChat Authentication successful:", req.user);
+    userAuthToken(req.user, 200, res);
+    res.redirect("http://localhost:5173/dashboard");
+  }
+);
+
 router.get(
   "/logout",
-  asyncErrCatcher((req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
+  userAuth,
+  asyncErrCatcher(async (req, res) => {
+    await OAuthToken.deleteMany({ userId: req.user._id })
+      .then(() => {
+        req.session.destroy((err) => {
+          if (err) {
+            return res.status(500).json({
+              success: false,
+              message: "Failed to log out",
+            });
+          }
+
+          res.cookie("user_token", "", {
+            maxAge: 0,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+          });
+
+          res.cookie("connect.sid", "", {
+            maxAge: 0,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+          });
+
+          res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+          });
+        });
+      })
+      .catch((err) => {
+        console.error(err);
         return res.status(500).json({
           success: false,
-          message: "Failed to log out",
+          message: "Failed to delete oauth tokens hence failed to log out",
         });
-      }
-
-      res.cookie("user_token", "", {
-        maxAge: 0,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
       });
-
-      res.cookie("connect.sid", "", {
-        maxAge: 0,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Logged out successfully",
-      });
-    });
   })
 );
 

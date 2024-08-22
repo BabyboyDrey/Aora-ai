@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const connectDb = require("./db/database");
 const path = require("path");
 const passport = require("./utils/passport.js");
+const MongoStore = require("connect-mongo");
 const session = require("express-session");
 const userRoutes = require("./controllers/users");
 const brandProfileRoutes = require("./controllers/brandProfile.js");
@@ -18,10 +19,7 @@ if (process.env.NODE_ENV !== "production") {
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://b9fngmgw-5002.euw.devtunnels.ms/",
-    ],
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
@@ -35,6 +33,16 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB,
+      collectionName: "sessions",
+      ttl: 24 * 60 * 60,
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    },
   })
 );
 app.use(passport.initialize());

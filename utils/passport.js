@@ -1,5 +1,6 @@
 const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
+const WechatStrategy = require("passport-wechat").Strategy;
 const expressSession = require("express-session");
 const Users = require("../models/users");
 require("dotenv").config();
@@ -35,6 +36,39 @@ passport.use(
             user.facebookId = id;
             await user.save();
           }
+        }
+
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
+      }
+    }
+  )
+);
+
+passport.use(
+  new WechatStrategy(
+    {
+      appID: process.env.WECHAT_APP_ID,
+      appSecret: process.env.WECHAT_APP_SECRET,
+      client: "web",
+      callbackURL: "http://localhost:5002/auth/wechat/callback",
+      scope: "snsapi_userinfo",
+      state: true,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        console.log("WeChat profile:", profile);
+        const { openid, unionid, nickname, headimgurl } = profile;
+
+        let user = await Users.findOne({ wechatId: unionid || openid });
+
+        if (!user) {
+          user = await Users.create({
+            wechatId: unionid || openid,
+            full_name: nickname,
+            avatar: headimgurl,
+          });
         }
 
         return done(null, user);

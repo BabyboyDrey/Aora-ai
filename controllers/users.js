@@ -397,6 +397,7 @@ router.get(
   (req, res) => {
     console.log("Authentication successful:", req.user);
     userAuthToken(req.user, 200, res);
+    res.redirect("http://localhost:5173/dashboard");
   }
 );
 

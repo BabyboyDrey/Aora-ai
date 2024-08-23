@@ -1,4 +1,5 @@
 const MongoStore = require("connect-mongo");
+const { default: mongoose } = require("mongoose");
 
 async function deletePreviousSessions(userId) {
   try {

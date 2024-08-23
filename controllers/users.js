@@ -13,6 +13,7 @@ const mongoose = require("mongoose");
 const checkAndDeleteFile = require("../utils/checkAndDeleteFile.js");
 const userAuth = require("../middlewares/userAuth.js");
 const OAuthToken = require("../models/oauthToken.js");
+const deletePreviousSessions = require("../utils/deleteSessions.js");
 
 router.post(
   "/login",
@@ -41,6 +42,7 @@ router.post(
           });
         }
       }
+      await deletePreviousSessions(found_user._id);
 
       const validated = await bcrypt.compare(
         req.body.password,
@@ -120,7 +122,7 @@ router.post(
       });
 
       const verificationCode = generateVerificationCode();
-
+      console.log("ui:", verificationCode);
       await TempUser.create({
         ...tempUser,
         verificationCode: verificationCode,
@@ -173,13 +175,13 @@ router.post(
           message: "Invalid or expired verification code",
         });
       }
-      if (tempUser.verificationCode !== code) {
-        return res.status(400).json({
+      if (Number(tempUser.verificationCode) !== Number(code)) {
+        return res.status(401).json({
           error: true,
           message: "Invalid or expired verification code",
         });
       }
-
+      console.log("now:", Date.now(), "expiry:", tempUser.expiresAt);
       if (tempUser.expiresAt < Date.now()) {
         return res.status(400).json({
           error: true,
@@ -193,6 +195,8 @@ router.post(
         full_name: tempUser.full_name,
         password: tempUser.password,
       });
+      await deletePreviousSessions(newUser._id);
+
       await TempUser.deleteOne({ _id: tempUser._id });
 
       userAuthToken(newUser, 200, res);

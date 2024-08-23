@@ -410,6 +410,10 @@ router.get("/auth/wechat", passport.authenticate("wechat"));
 
 router.get(
   "/auth/wechat/callback",
+  (req, res, next) => {
+    console.log("Wechat callback route hit");
+    next();
+  },
   passport.authenticate("wechat", {
     failureRedirect: "/",
   }),

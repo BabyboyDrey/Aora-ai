@@ -79,7 +79,8 @@ passport.use(
       appID: process.env.WECHAT_APP_ID,
       appSecret: process.env.WECHAT_APP_SECRET,
       client: "web",
-      callbackURL: "http://localhost:5002/auth/wechat/callback",
+      callbackURL:
+        "https://b9fngmgw-5002.euw.devtunnels.ms/api/v1/user/auth/wechat/callback",
       scope: "snsapi_userinfo",
       state: true,
     },

@@ -19,7 +19,7 @@ const sendSmsVerificationCode = async (phoneNumber, verificationCode) => {
 
     const message = await client.messages.create({
       body: `Your verification code is: ${verificationCode}`,
-      from: "Aora Ai",
+      from: process.env.TWILIO_PHONE_NUMBER,
       to: formattedPhoneNumber,
     });
     return message;

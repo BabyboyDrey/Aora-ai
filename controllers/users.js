@@ -335,8 +335,10 @@ router.post(
   asyncErrCatcher(async (req, res) => {
     try {
       const items = req.body;
-      let found_user;
+      console.log("it:", items);
+      const all_users = await Users.find({});
 
+      let found_user;
       if (items.phone_number) {
         found_user = await Users.findOne({ phone_number: items.phone_number });
         if (!found_user) {
@@ -357,6 +359,8 @@ router.post(
           });
         }
       }
+      console.log("all:", all_users);
+
       if (items.password !== items.confirm_password) {
         return res.status(400).json({
           error: true,
@@ -366,8 +370,9 @@ router.post(
 
       const salt = await bcrypt.genSalt(12);
       const hashedPass = await bcrypt.hash(items.password, salt);
-
+      console.log("user b4 updt:", found_user);
       found_user.password = hashedPass;
+      found_user.updatedAt = new Date(Date.now());
       console.log("lop:", JSON.stringify(found_user), found_user.password);
       await found_user.save();
 
@@ -511,6 +516,7 @@ router.put(
       }
 
       user.avatar = req.file.filename;
+      user.updatedAt = new Date(Date.now());
 
       await user.save();
 

@@ -4,7 +4,7 @@ const axios = require("axios");
 class ZhipuAI {
   constructor(apiKey) {
     this.apiKey = process.env.ZHIPU_APP_KEY;
-    this.baseUrl = "https://open.bigmodel.cn/api/paas/v4"; // Base URL for the API
+    this.baseUrl = process.env.ZHIPU_URL;
   }
 
   async chatCompletions(model, messages, options = {}) {

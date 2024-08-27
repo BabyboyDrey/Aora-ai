@@ -1,5 +1,24 @@
 const mongoose = require("mongoose");
 
+const trendAnalysisSectionSchema = new mongoose.Schema({
+  title: String,
+  points: [String],
+});
+
+const personaSchema = new mongoose.Schema({
+  name: String,
+  background: [String],
+  location: String,
+  occupation: String,
+  psychographic: [String],
+  beliefs: [String],
+  fears: [String],
+  interests: [String],
+  shopping_behavior: [String],
+  challenges: [String],
+  goals: [String],
+});
+
 const brandProfileSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -14,8 +33,13 @@ const brandProfileSchema = new mongoose.Schema({
   company_core_values: [String],
   target_market: String,
   unique_products: [String],
-  target_market_range: [String],
+  target_price_range: [String],
   product_demographics: [String],
+  trend_analysis: {
+    title: String,
+    content: [trendAnalysisSectionSchema],
+  },
+  customer_personas: [personaSchema],
 });
 
 module.exports = Brandprofile = mongoose.model(

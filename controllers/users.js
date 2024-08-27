@@ -27,7 +27,7 @@ router.post(
       async function getResponse() {
         try {
           const response = await client.chatCompletions(
-            "glm-4", // Model name
+            "glm-4",
             [
               {
                 role: "user",
@@ -47,7 +47,6 @@ router.post(
           console.log(cleanedMessage);
           res.json({ content: cleanedMessage });
 
-          //  // Replace '\n' with a space and then apply more structured formatting
           //  content = content.replace(/\n/g, " ");
 
           //  // Example of additional formatting:
@@ -114,7 +113,10 @@ router.post(
       );
 
       if (!validated) {
-        return res.status(400).json("Wrong credentials, try again");
+        return res.status(400).json({
+          error: true,
+          message: "Wrong credentials, try again",
+        });
       }
       userAuthToken(found_user, 200, res);
     } catch (err) {

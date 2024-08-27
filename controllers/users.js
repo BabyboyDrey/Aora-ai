@@ -14,6 +14,70 @@ const checkAndDeleteFile = require("../utils/checkAndDeleteFile.js");
 const userAuth = require("../middlewares/userAuth.js");
 const OAuthToken = require("../models/oauthToken.js");
 const deletePreviousSessions = require("../utils/deleteSessions.js");
+const ZhipuAI = require("../utils/zhipuAi.js");
+const { Prompt } = require("twilio/lib/twiml/VoiceResponse.js");
+
+router.post(
+  "/zhipu-prompt",
+  asyncErrCatcher(async (req, res) => {
+    try {
+      const client = new ZhipuAI(process.env.ZHIPU_APP_KEY);
+      const prompt = "Tell me about the history of nigeria.";
+
+      async function getResponse() {
+        try {
+          const response = await client.chatCompletions(
+            "glm-4", // Model name
+            [
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            {
+              max_tokens: 500,
+              temperature: 0.7,
+              top_p: 0.9,
+            }
+          );
+          const cleanedMessage = response.choices[0].message.content
+            .replace(/\n/g, " ")
+            .trim();
+
+          console.log(cleanedMessage);
+          res.json({ content: cleanedMessage });
+
+          //  // Replace '\n' with a space and then apply more structured formatting
+          //  content = content.replace(/\n/g, " ");
+
+          //  // Example of additional formatting:
+          //  content = content
+          //    .replace(/ 1\. /g, "\n\n**1.** ") // Heading for the first section
+          //    .replace(/ 2\. /g, "\n\n**2.** ") // Heading for the second section
+          //    .replace(/ 3\. /g, "\n\n**3.** ") // and so on...
+          //    .replace(/ 4\. /g, "\n\n**4.** ")
+          //    .replace(/ 5\. /g, "\n\n**5.** ")
+          //    .replace(/ 6\. /g, "\n\n**6.** ")
+          //    .replace(/ 7\. /g, "\n\n**7.** ")
+          //    .replace(/    - /g, "\n\n- "); // Bullet points
+
+          //  console.log(content);
+          //  res.json({ content });
+        } catch (error) {
+          console.error("Failed to get response:", error);
+        }
+      }
+
+      getResponse();
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: true,
+        message: err.message,
+      });
+    }
+  })
+);
 
 router.post(
   "/login",

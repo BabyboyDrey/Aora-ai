@@ -19,7 +19,7 @@ if (process.env.NODE_ENV !== "production") {
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://aoraai.vercel.app"],
     credentials: true,
   })
 );
@@ -32,10 +32,11 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB,
       collectionName: "sessions",
+      autoRemove: "native",
       ttl: 24 * 60 * 60,
     }),
     cookie: {

@@ -80,7 +80,7 @@ passport.use(
       appSecret: process.env.WECHAT_APP_SECRET,
       client: "web",
       callbackURL:
-        "https://b9fngmgw-5002.euw.devtunnels.ms/api/v1/user/auth/wechat/callback",
+        "https://aora-ai-5hb5.onrender.com/api/v1/user/auth/wechat/callback",
       scope: "snsapi_userinfo",
       state: true,
     },

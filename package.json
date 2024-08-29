@@ -29,6 +29,7 @@
     "passport-facebook": "^3.0.0",
     "passport-wechat": "^2.0.4",
     "path": "^0.12.7",
+    "replicate": "^0.32.0",
     "twilio": "^5.2.2"
   }
 }

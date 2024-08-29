@@ -7,7 +7,10 @@ module.exports = user1Auth = asyncErrCatcher(async (req, res, next) => {
     const userToken = req.cookies.user_token;
     console.log("tok:", userToken, req.cookies);
     if (!userToken) {
-      return res.status(403).json("Forbidden Access");
+      return res.status(403).json({
+        error: true,
+        message: "Forbidden Access",
+      });
     }
 
     const verified_user = jwt.verify(userToken, process.env.JWT_SECRET);
@@ -25,6 +28,9 @@ module.exports = user1Auth = asyncErrCatcher(async (req, res, next) => {
       });
     }
 
-    res.status(500).json(`Err Message: ${err}`);
+    res.status(500).json({
+      error: true,
+      message: err.message,
+    });
   }
 });

@@ -556,9 +556,7 @@ router.get(
             );
             brandProfile.pricing_analysis = jsonResponse;
             await brandProfile.save();
-            res.json({
-              jsonResponse,
-            });
+
             res.json({
               message: "Pricing analysis created successfully",
               pricing_analysis: brandProfile.pricing_analysis,

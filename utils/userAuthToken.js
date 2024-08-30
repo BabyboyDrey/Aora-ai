@@ -5,8 +5,9 @@ const userAuthToken = (user, statusCode, res) => {
 
   const options = {
     maxAge: JWT_EXPIRES_MS,
-    sameSite: "lax",
-    secure: false,
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production" ? true : false,
   };
 
   res.status(statusCode).cookie("user_token", user_token, options).json({

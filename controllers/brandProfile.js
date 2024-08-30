@@ -24,12 +24,6 @@ router.post(
       console.log("//;;pp//:", JSON.stringify(all_profiles));
 
       if (all_profiles) {
-        if (all_profiles.length === 0) {
-          return res.status(404).json({
-            error: true,
-            message: "No brand profile created.",
-          });
-        }
         const existing_industry = all_profiles.find(
           (e) => e.industry === items.industry
         );

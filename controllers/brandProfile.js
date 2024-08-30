@@ -22,22 +22,25 @@ router.post(
         userId: req.user.id,
       });
       console.log("//;;pp//:", JSON.stringify(all_profiles));
-      if (all_profiles.length === 0) {
-        return res.status(404).json({
-          error: true,
-          message: "No brand profile created.",
-        });
-      }
-      const existing_industry = all_profiles.find(
-        (e) => e.industry === items.industry
-      );
-      console.log("eerrtty:", existing_industry);
 
-      if (existing_industry) {
-        return res.status(404).json({
-          error: true,
-          message: "Brand profile created with this industry.",
-        });
+      if (all_profiles) {
+        if (all_profiles.length === 0) {
+          return res.status(404).json({
+            error: true,
+            message: "No brand profile created.",
+          });
+        }
+        const existing_industry = all_profiles.find(
+          (e) => e.industry === items.industry
+        );
+        console.log("eerrtty:", existing_industry);
+
+        if (existing_industry) {
+          return res.status(404).json({
+            error: true,
+            message: "Brand profile created with this industry.",
+          });
+        }
       }
       const created_brand = await Brandprofile.create(data);
 

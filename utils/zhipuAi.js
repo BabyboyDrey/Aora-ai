@@ -9,8 +9,8 @@ class ZhipuAI {
 
   async chatCompletions(model, messages, options = {}) {
     try {
-      const fullUrl = `${this.baseUrl}/chat/completions`;
-      console.log("API Request URL:", fullUrl); // This logs the URL to the console
+      //   const fullUrl = `${this.baseUrl}/chat/completions`;
+      //   console.log("API Request URL:", fullUrl); // This logs the URL to the console
 
       const response = await axios.post(
         `${this.baseUrl}/chat/completions`,

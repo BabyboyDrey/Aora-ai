@@ -71,7 +71,7 @@ router.get(
         });
       }
       console.log("/ll:", JSON.stringify(found_profile));
-      console.log("oiu:", process.env.ZHIPU_APP_KEY);
+      //   console.log("oiu:", process.env.ZHIPU_APP_KEY);
       const prompt = `Create a straight to the point and realistic trend analysis for this industry: ${found_profile.industry}`;
       const client = new ZhipuAI(process.env.ZHIPU_APP_KEY);
       let response;

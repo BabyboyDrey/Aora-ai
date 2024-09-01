@@ -5,6 +5,7 @@ const userAuth = require("../middlewares/userAuth.js");
 const ZhipuAI = require("../utils/zhipuAi.js");
 const brandProfile = require("../models/brandProfile.js");
 const Pricing = require("twilio/lib/rest/Pricing.js");
+require("dotenv").config();
 
 router.post(
   "/create-brand-profile",

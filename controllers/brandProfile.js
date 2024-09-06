@@ -596,6 +596,7 @@ router.post(
     try {
       const { id } = req.params;
       const items = req.body.massive_transformational_purpose;
+      console.log("items:", items);
       const brandProfile = await Brandprofile.findOne({
         userId: req.user.id,
         _id: id,

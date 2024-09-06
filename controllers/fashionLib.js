@@ -4,8 +4,89 @@ const path = require("path");
 const axios = require("axios");
 const asyncErrCatcher = require("../middlewares/asyncErrCatcher");
 const userAuth = require("../middlewares/userAuth");
+const FormData = require("form-data");
+const { upload } = require("../multer/multer_png");
 require("dotenv").config();
 const router = require("express").Router();
+
+router.post(
+  "/test",
+  upload.fields([{ name: "input_image" }, { name: "style_image" }]),
+  asyncErrCatcher(async (req, res) => {
+    try {
+      const { positive_prompt, negative_prompt, seed, cfg } = req.body;
+
+      // Check if files exist in the request
+      if (!req.files.input_image || !req.files.style_image) {
+        return res
+          .status(400)
+          .json({ error: "Missing input_image or style_image" });
+      }
+
+      // Get the file paths for the uploaded images
+      const inputImageFilePath = req.files.input_image[0].path;
+      const styleImageFilePath = req.files.style_image[0].path;
+
+      // Create FormData instance
+      const formData = new FormData();
+      formData.append("positive_prompt", positive_prompt);
+      formData.append("negative_prompt", negative_prompt);
+      formData.append("seed", seed);
+      formData.append("cfg", cfg);
+      formData.append("input_image", fs.createReadStream(inputImageFilePath));
+      formData.append("style_image", fs.createReadStream(styleImageFilePath));
+
+      const response = await axios.post(
+        "http://129.204.16.241:8000/illustration2studio_style",
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+            Authorization: `Bearer 259a686cefdfb8b6afd6d3584318f41aab32856ed0a1c922b9f936aa948373db`, // Authorization token
+          },
+        }
+      );
+
+      // Ensure the uploads directory exists
+      const uploadsDir = path.join(__dirname, "uploads");
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir);
+      }
+
+      // Extract the image data and MIME type from the response
+      const imageData = response.data.images[0].image_data;
+      const imageMimeType = response.data.images[0].image_mime_type; // Example: "image/PNG"
+
+      // Determine the file extension based on the MIME type
+      const fileExtension = imageMimeType.split("/")[1].toLowerCase(); // Will be "png" or "jpeg"
+
+      // Decode the base64 image data
+      const buffer = Buffer.from(imageData, "base64");
+
+      // Define the output file path
+      const outputFilePath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        `output_image.${fileExtension}`
+      );
+
+      // Write the image data to a file
+      fs.writeFileSync(outputFilePath, buffer);
+
+      console.log(`Image saved as ${outputFilePath}`);
+      res.status(200).json({
+        message: `Image saved as ${outputFilePath}`,
+        data: response.data,
+      });
+    } catch (err) {
+      console.error("Error occurred during API request:", err.message);
+      res
+        .status(500)
+        .json({ error: "Internal Server Error", message: err.message });
+    }
+  })
+);
 
 router.post(
   "/create-fashion",

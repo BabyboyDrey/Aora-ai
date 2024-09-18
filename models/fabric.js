@@ -1,20 +1,21 @@
 const mongoose = require("mongoose");
 
-const userStylesSchema = new mongoose.Schema(
+const fabricsSchema = new mongoose.Schema(
   {
-    image_name: String,
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    fabricImageName: String,
     designBookId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "DesignBook",
     },
+    fabricUuid: String,
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = UsersStyles = mongoose.model("UserStyles", userStylesSchema);
+module.exports = Fabrics = mongoose.model("Fabrics", fabricsSchema);

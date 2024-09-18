@@ -832,4 +832,34 @@ router.post(
   })
 );
 
+router.get(
+  "/get-all-brand-profiles",
+  userAuth,
+  asyncErrCatcher(async (req, res) => {
+    try {
+      const allBrandProfiles = await Brandprofile.find({
+        userId: req.user.id,
+      }).sort({
+        createdAt: -1,
+      });
+
+      if (allBrandProfiles.length === 0)
+        return res.status(404).json({
+          error: true,
+          message: "No brand profile found",
+        });
+
+      res.json({
+        allBrandProfiles,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: true,
+        message: err.message,
+      });
+    }
+  })
+);
+
 module.exports = router;

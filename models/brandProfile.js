@@ -85,44 +85,49 @@ const pricingAnalysisSchema = new mongoose.Schema({
   },
 });
 
-const brandProfileSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+const brandProfileSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    company_name: String,
+    industry: String,
+    products: [String],
+    years_in_business: Number,
+    countries_sold_to: String,
+    supplied_brands: String,
+    company_core_values: [String],
+    target_market: String,
+    unique_products: [String],
+    target_price_range: String,
+    product_demographics: String,
+    trend_analysis: {
+      title: String,
+      content: [trendAnalysisSectionSchema],
+    },
+    customer_personas: [personaSchema],
+    selected_customer_persona: Object,
+    pricing_analysis: pricingAnalysisSchema,
+    massive_transformational_purpose: {
+      what_do_your_brand_care_about_and_why: String,
+      what_is_yuor_brand_purpose: String,
+      what_does_the_world_need_from_your_industry_and_why: String,
+      what_would_you_do_if_you_couldnt_fail_and_why: String,
+      what_would_we_do_if_we_received_a_billion_dollars_today_and_why: String,
+    },
+    suggestions_for_mtp: {
+      what_do_your_brand_care_about_and_why: String,
+      what_is_yuor_brand_purpose: String,
+      what_does_the_world_need_from_your_industry_and_why: String,
+      what_would_you_do_if_you_couldnt_fail_and_why: String,
+      what_would_we_do_if_we_received_a_billion_dollars_today_and_why: String,
+    },
   },
-  company_name: String,
-  industry: String,
-  products: [String],
-  years_in_business: Number,
-  countries_sold_to: String,
-  supplied_brands: String,
-  company_core_values: [String],
-  target_market: String,
-  unique_products: [String],
-  target_price_range: String,
-  product_demographics: String,
-  trend_analysis: {
-    title: String,
-    content: [trendAnalysisSectionSchema],
-  },
-  customer_personas: [personaSchema],
-  selected_customer_persona: Object,
-  pricing_analysis: pricingAnalysisSchema,
-  massive_transformational_purpose: {
-    what_do_your_brand_care_about_and_why: String,
-    what_is_yuor_brand_purpose: String,
-    what_does_the_world_need_from_your_industry_and_why: String,
-    what_would_you_do_if_you_couldnt_fail_and_why: String,
-    what_would_we_do_if_we_received_a_billion_dollars_today_and_why: String,
-  },
-  suggestions_for_mtp: {
-    what_do_your_brand_care_about_and_why: String,
-    what_is_yuor_brand_purpose: String,
-    what_does_the_world_need_from_your_industry_and_why: String,
-    what_would_you_do_if_you_couldnt_fail_and_why: String,
-    what_would_we_do_if_we_received_a_billion_dollars_today_and_why: String,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = Brandprofile = mongoose.model(
   "Brandprofile",

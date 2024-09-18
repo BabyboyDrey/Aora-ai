@@ -8,9 +8,10 @@ const MongoStore = require("connect-mongo");
 const session = require("express-session");
 const userRoutes = require("./controllers/users");
 const brandProfileRoutes = require("./controllers/brandProfile.js");
-const fashioLibRoutes = require("./controllers/fashionLib.js");
-const designBookRoutes = require("./controllers/userDesignBook/designBook.js");
-const usersStylesRoutes = require("./controllers/userDesignBook/usersStyles.js");
+const designBookRoutes = require("./controllers/designBook.js");
+const modelsRoutes = require("./controllers/models.js");
+const fashionRoutes = require("./controllers/fashion.js");
+const fabricRoutes = require("./controllers/fabric.js");
 const app = express();
 
 if (process.env.NODE_ENV !== "production") {
@@ -54,9 +55,10 @@ app.use(passport.session());
 app.use("/", express.static("uploads"));
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/brandProfile", brandProfileRoutes);
-app.use("/api/v1/fs", fashioLibRoutes);
 app.use("/api/v1/user/debo", designBookRoutes);
-app.use("/api/v1/user/styles", usersStylesRoutes);
+app.use("/api/v1/user/model", modelsRoutes);
+app.use("/api/v1/user/fs", fashionRoutes);
+app.use("/api/v1/user/fabric", fabricRoutes);
 connectDb();
 
 process.on("uncaughtException", (err) => {

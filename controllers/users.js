@@ -499,7 +499,7 @@ router.get(
   "/logout",
   userAuth,
   asyncErrCatcher(async (req, res) => {
-    await OAuthToken.deleteMany({ userId: req.user._id })
+    await OAuthToken.deleteMany({ userId: req.user.id })
       .then(() => {
         req.session.destroy((err) => {
           if (err) {

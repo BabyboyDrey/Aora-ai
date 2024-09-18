@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const asyncErrCatcher = require("../../middlewares/asyncErrCatcher");
-const userAuth = require("../../middlewares/userAuth");
-const DesignBook = require("../../models/userDesignBook/designBook");
+const asyncErrCatcher = require("../middlewares/asyncErrCatcher");
+const userAuth = require("../middlewares/userAuth");
+const DesignBook = require("../models/designBook");
 
 router.post(
   "/create-design-book",
@@ -16,10 +16,23 @@ router.post(
 
         return `${year}${month}${day}`;
       };
+      const designName =
+        items.book_name || `Design-${formatDate(new Date())}-${Date.now()}`;
 
-      const designName = `Design-${formatDate(new Date())}-${Date.now()}`;
+      const foundDesignBook = await DesignBook.findOne({
+        userId: req.user.id,
+        book_name: designName,
+      });
+
+      if (foundDesignBook) {
+        return res.status(409).json({
+          error: true,
+          message: "Design Book already created with this name!",
+        });
+      }
+
       await DesignBook.create({
-        book_name: items.book_name ? items.book_name : designName,
+        book_name: designName,
         userId: req.user.id,
       });
       res.status(200).json({

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userStylesSchema = new mongoose.Schema(
+const stylesSchema = new mongoose.Schema(
   {
     style_image_name: [String],
     userId: {
@@ -20,4 +20,4 @@ const userStylesSchema = new mongoose.Schema(
   }
 );
 
-module.exports = UsersStyles = mongoose.model("UserStyles", userStylesSchema);
+module.exports = Styles = mongoose.model("Styles", stylesSchema);

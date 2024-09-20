@@ -856,4 +856,71 @@ router.post(
   })
 );
 
+router.get(
+  "/get-user-clothings/:designBookId",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    try {
+      const { designBookId } = req.params;
+
+      if (!designBookId || !mongoose.Types.ObjectId.isValid(designBookId)) {
+        throw new Error("Invalid or no required paramter provided!");
+      }
+
+      const allClothings = await clothings.find({
+        userId: req.user.id,
+        designBookId,
+      });
+
+      if (allClothings.length === 0) {
+        return res.status(404).json({
+          error: true,
+          message: "No clothing created for this user",
+        });
+      }
+
+      res.json({
+        success: true,
+        allClothings,
+      });
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  })
+);
+router.get(
+  "/get-user-styles/:designBookId",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    try {
+      const { designBookId } = req.params;
+
+      if (!designBookId || !mongoose.Types.ObjectId.isValid(designBookId)) {
+        throw new Error("Invalid or no required paramter provided!");
+      }
+
+      const allStyles = await styles.find({
+        userId: req.user.id,
+        designBookId,
+      });
+
+      if (allStyles.length === 0) {
+        return res.status(404).json({
+          error: true,
+          message: "No styles created for this user",
+        });
+      }
+
+      res.json({
+        success: true,
+        allStyles,
+      });
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  })
+);
+
 module.exports = router;

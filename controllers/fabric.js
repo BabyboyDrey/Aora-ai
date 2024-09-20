@@ -191,4 +191,38 @@ router.post(
   })
 );
 
+router.get(
+  "/get-user-fabrics/:designBookId",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    try {
+      const { designBookId } = req.params;
+
+      if (!designBookId || !mongoose.Types.ObjectId.isValid(designBookId)) {
+        throw new Error("Invalid or no required paramter provided!");
+      }
+
+      const allFabrics = await fabric.find({
+        userId: req.user.id,
+        designBookId,
+      });
+
+      if (allFabrics.length === 0) {
+        return res.status(404).json({
+          error: true,
+          message: "No fabric created for this user",
+        });
+      }
+
+      res.json({
+        success: true,
+        allFabrics,
+      });
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  })
+);
+
 module.exports = router;

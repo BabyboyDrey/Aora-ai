@@ -49,4 +49,31 @@ router.post(
   })
 );
 
+router.get(
+  "/get-user-design-book",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    try {
+      const allBooks = await DesignBook.find({
+        userId: req.user.id,
+      });
+
+      if (allBooks.length === 0) {
+        return res.status(404).json({
+          error: true,
+          message: "No design book created for this user",
+        });
+      }
+
+      res.json({
+        success: true,
+        allBooks,
+      });
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  })
+);
+
 module.exports = router;

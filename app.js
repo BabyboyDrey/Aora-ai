@@ -12,6 +12,7 @@ const designBookRoutes = require("./controllers/designBook.js");
 const modelsRoutes = require("./controllers/models.js");
 const fashionRoutes = require("./controllers/fashion.js");
 const fabricRoutes = require("./controllers/fabric.js");
+const morgan = require("morgan");
 const app = express();
 
 if (process.env.NODE_ENV !== "production") {
@@ -30,7 +31,7 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -59,6 +60,9 @@ app.use("/api/v1/user/debo", designBookRoutes);
 app.use("/api/v1/user/model", modelsRoutes);
 app.use("/api/v1/user/fs", fashionRoutes);
 app.use("/api/v1/user/fabric", fabricRoutes);
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms")
+);
 connectDb();
 
 process.on("uncaughtException", (err) => {

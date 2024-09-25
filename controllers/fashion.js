@@ -418,6 +418,7 @@ router.post(
         ]);
         throw new Error("Design Book not found");
       }
+      console.log("req.files:", req.files);
       if (!req.files["input_image"] || !req.files["style_image"]) {
         await Promise.all([
           checkAndDeleteFile(
@@ -542,7 +543,7 @@ router.post(
         ),
       ]);
       console.error(err);
-      next(err);
+      next(err.message);
     }
   })
 );

@@ -391,6 +391,7 @@ router.post(
         userId: req.user.id,
         _id: designBookId,
       });
+
       console.log("ids:", designBookId);
 
       if (!designBookId || !mongoose.Types.ObjectId.isValid(designBookId)) {
@@ -418,6 +419,7 @@ router.post(
         ]);
         throw new Error("Design Book not found");
       }
+      console.log("req.body", req.body);
       console.log("req.files:", req.files);
       if (!req.files["input_image"] || !req.files["style_image"]) {
         await Promise.all([

@@ -23,7 +23,11 @@ if (process.env.NODE_ENV !== "production") {
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://aoraai.vercel.app"],
+    origin: [
+      "http://localhost:5173",
+      "https://aoraai.vercel.app",
+      "https://b9fngmgw-5003.euw.devtunnels.ms",
+    ],
     credentials: true,
   })
 );

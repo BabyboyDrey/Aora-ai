@@ -12,6 +12,22 @@ const FormData = require("form-data");
 const designBook = require("../models/designBook");
 const clothings = require("../models/clothings");
 
+router.get(
+  "/test",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    try {
+      res.json({
+        time: new Date().getTime(),
+        userId: req.user.id,
+      });
+    } catch (err) {
+      console.error(err);
+      next(err.message);
+    }
+  })
+);
+
 router.post(
   "/create-style/:designBookId",
   userAuth,
@@ -472,9 +488,16 @@ router.post(
       }
       console.log("Number of images returned:", response.data.images.length);
       const outputFilePaths = [];
+      const base64images = [];
       let imagePaths;
       if (response.data.images.length > 1) {
         imagePaths = response.data.images.map((imageData, index) => {
+          const base64image = {
+            image_uuid: imageData.image_uuid,
+            image_data: imageData.image_data,
+            image_mime_type: imageData.image_mime_type,
+          };
+          base64images.push(base64image);
           const imageMimeType = imageData.image_mime_type;
           const fileExtension = imageMimeType.split("/")[1].toLowerCase();
           const buffer = Buffer.from(imageData.image_data, "base64");
@@ -496,6 +519,13 @@ router.post(
         });
       } else {
         const imageData = response.data.images[0];
+
+        const base64image = {
+          image_uuid: imageData.image_uuid,
+          image_data: imageData.image_data,
+          image_mime_type: imageData.image_mime_type,
+        };
+        base64images.push(base64image);
         const imageMimeType = response.data.images[0].image_mime_type;
         const fileExtension = imageMimeType.split("/")[1].toLowerCase();
         const buffer = Buffer.from(imageData.image_data, "base64");
@@ -528,10 +558,12 @@ router.post(
         clothing_image_name: imagePaths ? imagePaths : outputFilePaths,
         clothing_image_uuid,
       });
+
       console.log("new_clothing", new_clothing);
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePaths}`,
+        clothing_images: base64images,
         clothing_name: new_clothing.clothing_image_name,
         response: response.data.images_info,
       });

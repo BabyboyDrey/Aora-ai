@@ -20,6 +20,5 @@ if (cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  // Worker process
   require("./app.js");
 }

@@ -401,8 +401,20 @@ router.post(
   asyncErrCatcher(async (req, res, next) => {
     try {
       const { designBookId } = req.params;
-      const { positive_prompt, negative_prompt, num_images, seed, cfg } =
+      let { positive_prompt, negative_prompt, num_images, seed, cfg } =
         req.body;
+      if (num_images) {
+        num_images = Number(num_images);
+        console.log("num_images:", num_images);
+      }
+      if (seed) {
+        seed = Number(seed);
+        console.log("seed:", seed);
+      }
+      if (cfg) {
+        cfg = Number(cfg);
+        console.log("cfg:", cfg);
+      }
       const foundDesignBook = await designBook.findOne({
         userId: req.user.id,
         _id: designBookId,
@@ -526,6 +538,12 @@ router.post(
           image_mime_type: imageData.image_mime_type,
         };
         base64images.push(base64image);
+        console.log(
+          "response.data.images[0].image_mime_type:",
+
+          response.data.images[0].image_mime_type,
+          response.data
+        );
         const imageMimeType = response.data.images[0].image_mime_type;
         const fileExtension = imageMimeType.split("/")[1].toLowerCase();
         const buffer = Buffer.from(imageData.image_data, "base64");

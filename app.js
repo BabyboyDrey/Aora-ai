@@ -12,6 +12,7 @@ const designBookRoutes = require("./controllers/designBook.js");
 const modelsRoutes = require("./controllers/models.js");
 const fashionRoutes = require("./controllers/fashion.js");
 const fabricRoutes = require("./controllers/fabric.js");
+const contentRoutes = require("./controllers/content.js");
 const morgan = require("morgan");
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(
       "http://localhost:5173",
       "https://aoraai.vercel.app",
       "https://b9fngmgw-5003.euw.devtunnels.ms",
+      "https://reserve-documented-virtue-specifications.trycloudflare.com",
     ],
     credentials: true,
   })
@@ -64,6 +66,7 @@ app.use("/api/v1/user/debo", designBookRoutes);
 app.use("/api/v1/user/model", modelsRoutes);
 app.use("/api/v1/user/fs", fashionRoutes);
 app.use("/api/v1/user/fabric", fabricRoutes);
+app.use("/api/v1/user/content", contentRoutes);
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms")
 );

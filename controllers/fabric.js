@@ -152,6 +152,14 @@ router.post(
       console.log("Number of images returned:", response.data.images.length);
 
       const imageData = response.data.images[0];
+      const base64images = [];
+
+      const base64image = {
+        image_uuid: imageData.image_uuid,
+        image_data: imageData.image_data,
+        image_mime_type: imageData.image_mime_type,
+      };
+      base64images.push(base64image);
       const imageMimeType = response.data.images[0].image_mime_type;
       const fileExtension = imageMimeType.split("/")[1].toLowerCase();
       const buffer = Buffer.from(imageData.image_data, "base64");
@@ -182,6 +190,7 @@ router.post(
         success: true,
         message: "Fabric updated successfully",
         fabricImageName: foundFabric.fabricImageName,
+        fabric_image: base64images,
       });
     } catch (err) {
       await checkAndDeleteFile(`uploads/${req.file.filename}`);

@@ -301,9 +301,17 @@ router.post(
       }
       console.log("Number of images returned:", response.data.images.length);
       const outputFilePaths = [];
+      const base64images = [];
+
       let imagePaths;
       if (response.data.images.length > 1) {
         imagePaths = response.data.images.map((imageData, index) => {
+          const base64image = {
+            image_uuid: imageData.image_uuid,
+            image_data: imageData.image_data,
+            image_mime_type: imageData.image_mime_type,
+          };
+          base64images.push(base64image);
           const imageMimeType = imageData.image_mime_type;
           const fileExtension = imageMimeType.split("/")[1].toLowerCase();
           const buffer = Buffer.from(imageData.image_data, "base64");
@@ -325,6 +333,12 @@ router.post(
         });
       } else {
         const imageData = response.data.images[0];
+        const base64image = {
+          image_uuid: imageData.image_uuid,
+          image_data: imageData.image_data,
+          image_mime_type: imageData.image_mime_type,
+        };
+        base64images.push(base64image);
         const imageMimeType = response.data.images[0].image_mime_type;
         const fileExtension = imageMimeType.split("/")[1].toLowerCase();
         const buffer = Buffer.from(imageData.image_data, "base64");
@@ -361,6 +375,7 @@ router.post(
         success: true,
         message: `Images saved as ${outputFilePaths}`,
         model_name: new_model.model_image_name,
+        model_images: base64images,
         response: response.data.images_info,
       });
     } catch (err) {
@@ -479,6 +494,14 @@ router.post(
         throw new Error("Invalid response from the API: Missing image data.");
       }
       const imageData = response.data.images[0];
+      const base64images = [];
+
+      const base64image = {
+        image_uuid: imageData.image_uuid,
+        image_data: imageData.image_data,
+        image_mime_type: imageData.image_mime_type,
+      };
+      base64images.push(base64image);
       const imageMimeType = response.data.images[0].image_mime_type;
       const fileExtension = imageMimeType.split("/")[1].toLowerCase();
       const buffer = Buffer.from(imageData.image_data, "base64");
@@ -529,6 +552,7 @@ router.post(
         success: true,
         message: `Images saved as ${outputFilePath}`,
         model_name: output_image_name,
+        model_images: base64images,
         response: response.data.images_info,
       });
     } catch (err) {
@@ -643,6 +667,14 @@ router.post(
         throw new Error("Invalid response from the API: Missing image data.");
       }
       const imageData = response.data.images[0];
+      const base64images = [];
+
+      const base64image = {
+        image_uuid: imageData.image_uuid,
+        image_data: imageData.image_data,
+        image_mime_type: imageData.image_mime_type,
+      };
+      base64images.push(base64image);
       const imageMimeType = response.data.images[0].image_mime_type;
       const fileExtension = imageMimeType.split("/")[1].toLowerCase();
       const buffer = Buffer.from(imageData.image_data, "base64");
@@ -693,6 +725,7 @@ router.post(
         success: true,
         message: `Images saved as ${outputFilePath}`,
         model_name: output_image_name,
+        model_images: base64images,
         response: response.data.images_info,
       });
     } catch (err) {
@@ -849,6 +882,14 @@ router.post(
       }
       console.log("response gotten");
       const imageData = response.data.images[0];
+      const base64images = [];
+
+      const base64image = {
+        image_uuid: imageData.image_uuid,
+        image_data: imageData.image_data,
+        image_mime_type: imageData.image_mime_type,
+      };
+      base64images.push(base64image);
       const imageMimeType = response.data.images[0].image_mime_type;
       const fileExtension = imageMimeType.split("/")[1].toLowerCase();
       const buffer = Buffer.from(imageData.image_data, "base64");
@@ -894,6 +935,7 @@ router.post(
         success: true,
         message: `Images saved as ${outputFilePath}`,
         model_name: output_image_name,
+        model_images: base64images,
         response: response.data.images_info,
       });
     } catch (err) {
@@ -1001,6 +1043,14 @@ router.post(
       console.log("Number of images returned:", response.data.images.length);
 
       const imageData = response.data.images[0];
+      const base64images = [];
+
+      const base64image = {
+        image_uuid: imageData.image_uuid,
+        image_data: imageData.image_data,
+        image_mime_type: imageData.image_mime_type,
+      };
+      base64images.push(base64image);
       const imageMimeType = response.data.images[0].image_mime_type;
       const fileExtension = imageMimeType.split("/")[1].toLowerCase();
       const buffer = Buffer.from(imageData.image_data, "base64");
@@ -1053,6 +1103,7 @@ router.post(
         success: true,
         message: `Images saved as ${outputFilePath}`,
         model_name: output_image_name,
+        model_images: base64images,
         response: response.data.images_info,
       });
     } catch (err) {

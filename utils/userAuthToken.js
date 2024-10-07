@@ -6,8 +6,8 @@ const userAuthToken = (user, statusCode, res) => {
   const options = {
     maxAge: JWT_EXPIRES_MS,
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: "none",
+    secure: true,
   };
   //process.env.NODE_ENV === "production" ? "none" : "lax"
   //process.env.NODE_ENV === "production" ? true : false

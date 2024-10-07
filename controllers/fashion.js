@@ -785,43 +785,20 @@ router.post(
 );
 
 router.post(
-  "/change-background/:designBookId/:styleId",
+  "/change-background/:designBookId",
   userAuth,
   upload.single("input_image"),
   asyncErrCatcher(async (req, res, next) => {
     try {
-      const { designBookId, styleId } = req.params;
-      const { positive_prompt, negative_prompt, cfg, num_images } = req.body;
+      const { designBookId } = req.params;
       const foundDesignBook = await designBook.findOne({
         userId: req.user.id,
         _id: designBookId,
       });
       console.log("ids:", designBookId, styleId);
       console.log("req.file.filename:", req.file);
-      const foundStyle = await styles.findOne({
-        userId: req.user.id,
-        designBookId: designBookId,
-        _id: styleId,
-        style_image_name: req.file.originalname,
-      });
-      console.log("found style", foundStyle);
-      if (!foundStyle) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
-        console.error("No style found with id");
-        throw new Error("No style found with id");
-      }
 
-      if (
-        !designBookId ||
-        !mongoose.Types.ObjectId.isValid(designBookId) ||
-        !styleId ||
-        !mongoose.Types.ObjectId.isValid(styleId)
-      ) {
+      if (!designBookId || !mongoose.Types.ObjectId.isValid(designBookId)) {
         await new Promise((resolve, reject) => {
           checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
             if (err) reject(err);
@@ -830,7 +807,7 @@ router.post(
         });
         return res.status(400).json({
           error: true,
-          message: "Invalid or no paramters provided!",
+          message: "Invalid or no paramter provided!",
         });
       }
 
@@ -856,10 +833,8 @@ router.post(
 
       const inputImagePath = req.file.path;
       const formData = new FormData();
-      formData.append("positive_prompt", positive_prompt);
-      formData.append("negative_prompt", negative_prompt);
-      formData.append("cfg", cfg);
-      formData.append("num_images", num_images);
+
+      formData.append("num_images", 1);
       formData.append("input_image", fs.createReadStream(inputImagePath));
 
       const response = await axios.post(
@@ -894,46 +869,7 @@ router.post(
         image_mime_type: imageData.image_mime_type,
       };
       base64images.push(base64image);
-      const imageMimeType = response.data.images[0].image_mime_type;
-      const fileExtension = imageMimeType.split("/")[1].toLowerCase();
-      const buffer = Buffer.from(imageData.image_data, "base64");
-      const uploadsDir = path.join(__dirname, "..", "output_uploads");
 
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir);
-      }
-
-      let styleIndex;
-      if (foundStyle) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(
-            `output_uploads/${req.file.originalname}`,
-            (err) => {
-              if (err) reject(err);
-              else resolve();
-            }
-          );
-        });
-
-        styleIndex = foundStyle.style_image_name.indexOf(req.file.originalname);
-        if (styleIndex !== -1) {
-          console.log(`Filename found at index: ${styleIndex}`);
-        } else {
-          console.log("Filename not found in the array");
-        }
-      }
-
-      const uniqueSuffix = Date.now() + "-" + Math.floor(Math.random() * 1e9);
-      const output_image_name = `output_image-${uniqueSuffix}-${styleIndex}.${fileExtension}`;
-      const outputFilePath = path.join(uploadsDir, output_image_name);
-
-      fs.writeFileSync(outputFilePath, buffer);
-
-      foundStyle.style_image_uuid[styleIndex] =
-        response.data.images_info[0].image_uuid;
-      foundStyle.style_image_name[styleIndex] = output_image_name;
-      foundStyle.updatedAt = new Date();
-      await foundStyle.save();
       await new Promise((resolve, reject) => {
         checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
           if (err) reject(err);
@@ -942,8 +878,6 @@ router.post(
       });
       res.status(200).json({
         success: true,
-        message: `Images saved as ${outputFilePath}`,
-        style_name: output_image_name,
         response: response.data.images_info,
         style_image: base64images,
       });
@@ -962,43 +896,20 @@ router.post(
 //done
 
 router.post(
-  "/remove-background/:designBookId/:styleId",
+  "/remove-background/:designBookId",
   userAuth,
   upload.single("input_image"),
   asyncErrCatcher(async (req, res, next) => {
     try {
-      const { designBookId, styleId } = req.params;
-      const { num_images } = req.body;
+      const { designBookId } = req.params;
       const foundDesignBook = await designBook.findOne({
         userId: req.user.id,
         _id: designBookId,
       });
       console.log("ids:", designBookId, styleId);
       console.log("req.file.filename:", req.file);
-      const foundStyle = await styles.findOne({
-        userId: req.user.id,
-        designBookId: designBookId,
-        _id: styleId,
-        style_image_name: req.file.originalname,
-      });
-      console.log("found style", foundStyle);
-      if (!foundStyle) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
-        console.error("No style found with id");
-        throw new Error("No style found with id");
-      }
 
-      if (
-        !designBookId ||
-        !mongoose.Types.ObjectId.isValid(designBookId) ||
-        !styleId ||
-        !mongoose.Types.ObjectId.isValid(styleId)
-      ) {
+      if (!designBookId || !mongoose.Types.ObjectId.isValid(designBookId)) {
         await new Promise((resolve, reject) => {
           checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
             if (err) reject(err);
@@ -1007,7 +918,7 @@ router.post(
         });
         return res.status(400).json({
           error: true,
-          message: "Invalid or no paramters provided!",
+          message: "Invalid or no paramter provided!",
         });
       }
 
@@ -1033,7 +944,7 @@ router.post(
 
       const inputImagePath = req.file.path;
       const formData = new FormData();
-      formData.append("num_images", num_images);
+      formData.append("num_images", 1);
       formData.append("input_image", fs.createReadStream(inputImagePath));
 
       const response = await axios.post(
@@ -1069,46 +980,7 @@ router.post(
         image_mime_type: imageData.image_mime_type,
       };
       base64images.push(base64image);
-      const imageMimeType = response.data.images[0].image_mime_type;
-      const fileExtension = imageMimeType.split("/")[1].toLowerCase();
-      const buffer = Buffer.from(imageData.image_data, "base64");
-      const uploadsDir = path.join(__dirname, "..", "output_uploads");
 
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir);
-      }
-
-      let styleIndex;
-      if (foundStyle) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(
-            `output_uploads/${req.file.originalname}`,
-            (err) => {
-              if (err) reject(err);
-              else resolve();
-            }
-          );
-        });
-
-        styleIndex = foundStyle.style_image_name.indexOf(req.file.originalname);
-        if (styleIndex !== -1) {
-          console.log(`Filename found at index: ${styleIndex}`);
-        } else {
-          console.log("Filename not found in the array");
-        }
-      }
-
-      const uniqueSuffix = Date.now() + "-" + Math.floor(Math.random() * 1e9);
-      const output_image_name = `output_image-${uniqueSuffix}-${styleIndex}.${fileExtension}`;
-      const outputFilePath = path.join(uploadsDir, output_image_name);
-
-      fs.writeFileSync(outputFilePath, buffer);
-
-      foundStyle.style_image_uuid[styleIndex] =
-        response.data.images_info[0].image_uuid;
-      foundStyle.style_image_name[styleIndex] = output_image_name;
-      foundStyle.updatedAt = new Date();
-      await foundStyle.save();
       await new Promise((resolve, reject) => {
         checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
           if (err) reject(err);
@@ -1117,8 +989,6 @@ router.post(
       });
       res.status(200).json({
         success: true,
-        message: `Images saved as ${outputFilePath}`,
-        style_name: output_image_name,
         style_images: base64images,
         response: response.data.images_info,
       });
@@ -1136,45 +1006,18 @@ router.post(
 );
 
 router.post(
-  "/use-magic-tool/:designBookId/:styleId",
+  "/use-magic-tool/:designBookId",
   userAuth,
   upload.fields([{ name: "input_image" }, { name: "mask_image" }]),
   asyncErrCatcher(async (req, res, next) => {
     try {
-      const { designBookId, styleId } = req.params;
-      const { num_images, positive_prompt, negative_prompt, cfg } = req.body;
+      const { designBookId } = req.params;
       const foundDesignBook = await designBook.findOne({
         userId: req.user.id,
         _id: designBookId,
       });
 
-      const foundStyle = await styles.findOne({
-        userId: req.user.id,
-        designBookId,
-        _id: styleId,
-        style_image_name: req.files["input_image"]?.[0]?.originalname,
-      });
-
-      if (!foundStyle) {
-        await Promise.all([
-          req.files["input_image"]?.[0]?.filename &&
-            checkAndDeleteFile(
-              `uploads/${req.files["input_image"][0].filename}`
-            ),
-          req.files["mask_image"]?.[0]?.filename &&
-            checkAndDeleteFile(
-              `uploads/${req.files["mask_image"][0].filename}`
-            ),
-        ]);
-        throw new Error("No style found with id and selected input image");
-      }
-
-      if (
-        !designBookId ||
-        !mongoose.Types.ObjectId.isValid(designBookId) ||
-        !styleId ||
-        !mongoose.Types.ObjectId.isValid(styleId)
-      ) {
+      if (!designBookId || !mongoose.Types.ObjectId.isValid(designBookId)) {
         await Promise.all([
           req.files["input_image"]?.[0]?.filename &&
             checkAndDeleteFile(
@@ -1187,7 +1030,7 @@ router.post(
         ]);
         return res.status(400).json({
           error: true,
-          message: "Invalid or no parameters provided!",
+          message: "Invalid or no parameter provided!",
         });
       }
 
@@ -1222,10 +1065,7 @@ router.post(
       const inputImagePath = req.files["input_image"][0].path;
       const maskImagePath = req.files["mask_image"][0].path;
       const formData = new FormData();
-      formData.append("num_images", num_images);
-      formData.append("positive_prompt", positive_prompt);
-      formData.append("negative_prompt", negative_prompt);
-      formData.append("cfg", cfg);
+      formData.append("num_images", 1);
       formData.append("input_image", fs.createReadStream(inputImagePath));
       formData.append("mask_image", fs.createReadStream(maskImagePath));
 
@@ -1284,39 +1124,6 @@ router.post(
         image_mime_type: imageData.image_mime_type,
       };
       base64images.push(base64image);
-      const imageMimeType = response.data.images[0].image_mime_type;
-      const fileExtension = imageMimeType.split("/")[1].toLowerCase();
-      const buffer = Buffer.from(imageData.image_data, "base64");
-      const uploadsDir = path.join(__dirname, "..", "output_uploads");
-
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir);
-      }
-      console.log("style gotten");
-
-      let styleIndex;
-      if (foundStyle) {
-        await checkAndDeleteFile(
-          `output_uploads/${req.files["input_image"]?.[0]?.originalname}`
-        );
-
-        styleIndex = foundStyle.style_image_name.indexOf(
-          req.files["input_image"]?.[0]?.originalname
-        );
-      }
-
-      const uniqueSuffix = Date.now() + "-" + Math.floor(Math.random() * 1e9);
-      const output_image_name = `output_image-${uniqueSuffix}-${styleIndex}.${fileExtension}`;
-      const outputFilePath = path.join(uploadsDir, output_image_name);
-      console.log("image created");
-
-      fs.writeFileSync(outputFilePath, buffer);
-
-      foundStyle.style_image_uuid[styleIndex] =
-        response.data.images_info[0].image_uuid;
-      foundStyle.style_image_name[styleIndex] = output_image_name;
-      foundStyle.updatedAt = new Date();
-      await foundStyle.save();
 
       await Promise.all([
         checkAndDeleteFile(

@@ -122,8 +122,16 @@ router.post(
       console.log("Number of images returned:", response.data.images.length);
       const outputFilePaths = [];
       let imagePaths;
+      const base64images = [];
+
       if (response.data.images.length > 1) {
         imagePaths = response.data.images.map((imageData, index) => {
+          const base64image = {
+            image_uuid: imageData.image_uuid,
+            image_data: imageData.image_data,
+            image_mime_type: imageData.image_mime_type,
+          };
+          base64images.push(base64image);
           const imageMimeType = imageData.image_mime_type;
           const fileExtension = imageMimeType.split("/")[1].toLowerCase();
           const buffer = Buffer.from(imageData.image_data, "base64");
@@ -145,6 +153,13 @@ router.post(
         });
       } else {
         const imageData = response.data.images[0];
+        const base64image = {
+          image_uuid: imageData.image_uuid,
+          image_data: imageData.image_data,
+          image_mime_type: imageData.image_mime_type,
+        };
+        base64images.push(base64image);
+        console.log("response.data.images[0]:", response.data.images[0]);
         const imageMimeType = response.data.images[0].image_mime_type;
         const fileExtension = imageMimeType.split("/")[1].toLowerCase();
         const buffer = Buffer.from(imageData.image_data, "base64");
@@ -174,6 +189,7 @@ router.post(
         background_image: req.files["background_image"][0].filename,
         pose_image: req.files["pose_image"][0].filename,
         model_image_name: imagePaths ? imagePaths : outputFilePaths,
+        model_images: base64images,
         model_uuid,
       });
 

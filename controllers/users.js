@@ -17,6 +17,7 @@ const deletePreviousSessions = require("../utils/deleteSessions.js");
 const ZhipuAI = require("../utils/zhipuAi.js");
 const { Prompt } = require("twilio/lib/twiml/VoiceResponse.js");
 const path = require("path");
+const fs = require("fs");
 
 router.post(
   "/zhipu-prompt",
@@ -547,6 +548,8 @@ router.put(
   asyncErrCatcher(async (req, res) => {
     try {
       const { id } = req.params;
+      console.log("id:", id);
+      console.log("req.file:", req.file.filename);
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         await new Promise((resolve, reject) => {
@@ -562,6 +565,7 @@ router.put(
       }
 
       const user = await Users.findById(id);
+      console.log("user b4 update:", user);
       if (!user) {
         await new Promise((resolve, reject) => {
           checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
@@ -581,30 +585,35 @@ router.put(
           message: "No file sent",
         });
       }
+      console.log("starting processing");
 
       const imagePath = path.join(__dirname, `uploads/${req.file.filename}`);
-      fs.readFile(imagePath, async (err, data) => {
-        if (err) {
-          console.error("Error reading image file:", err);
-          return res.status(500).json({
-            error: true,
-            message: "Error reading image file",
-          });
-        }
+      let base64Image;
 
-        const base64Image = data.toString("base64");
-
-        user.avatar = req.file.filename;
-        user.avatar_base64_string = base64Image;
-        user.updatedAt = new Date(Date.now());
-
-        await user.save();
-
-        res.status(200).json({
-          success: true,
-          message: "User avatar updated successfully",
-          avatar: base64Image,
+      // Use promises to read file asynchronously and wait for the result
+      try {
+        const data = await fs.readFile(imagePath);
+        base64Image = data.toString("base64");
+        console.log("File read successfully, base64Image:", base64Image);
+      } catch (err) {
+        console.error("Error reading image file:", err);
+        return res.status(500).json({
+          error: true,
+          message: "Error reading image file",
         });
+      }
+
+      user.avatar = req.file.filename;
+      user.avatar_base64_string = base64Image;
+      user.updatedAt = new Date(Date.now());
+
+      await user.save();
+      console.log("user after update:", user);
+
+      res.status(200).json({
+        success: true,
+        message: "User avatar updated successfully",
+        avatar: base64Image,
       });
     } catch (err) {
       await new Promise((resolve, reject) => {
@@ -621,5 +630,93 @@ router.put(
     }
   })
 );
+
+// router.put(
+//   "/update-user-avatar/:id",
+//   upload.single("avatar"),
+//   userAuth,
+//   asyncErrCatcher(async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       console.log("id:", id);
+//       console.log("req.file:", req.file.filename);
+
+//       if (!mongoose.Types.ObjectId.isValid(id)) {
+//         await new Promise((resolve, reject) => {
+//           checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+//             if (err) reject(err);
+//             else resolve();
+//           });
+//         });
+//         return res.status(400).json({
+//           error: true,
+//           message: "Invalid ID format",
+//         });
+//       }
+
+//       const user = await Users.findById(id);
+//       console.log("user b4 update:", user);
+//       if (!user) {
+//         await new Promise((resolve, reject) => {
+//           checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+//             if (err) reject(err);
+//             else resolve();
+//           });
+//         });
+//         return res.status(404).json({
+//           error: true,
+//           message: "No user with this ID",
+//         });
+//       }
+
+//       if (!req.file) {
+//         return res.status(400).json({
+//           error: true,
+//           message: "No file sent",
+//         });
+//       }
+//       console.log("starting processing");
+//       const imagePath = path.join(__dirname, `uploads/${req.file.filename}`);
+//       let base64Image;
+//       console.log("imagePath:", imagePath, "base64Image:", base64Image);
+//       fs.readFile(imagePath, async (err, data) => {
+//         if (err) {
+//           console.error("Error reading image file:", err);
+//           return res.status(500).json({
+//             error: true,
+//             message: "Error reading image file",
+//           });
+//         }
+
+//         base64Image = data.toString("base64");
+//       });
+//       console.log("processing");
+
+//       user.avatar = req.file.filename;
+//       user.avatar_base64_string = base64Image;
+//       user.updatedAt = new Date(Date.now());
+//       await user.save();
+//       console.log("user after update:", user);
+
+//       res.status(200).json({
+//         success: true,
+//         message: "User avatar updated successfully",
+//         avatar: base64Image,
+//       });
+//     } catch (err) {
+//       await new Promise((resolve, reject) => {
+//         checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+//           if (err) reject(err);
+//           else resolve();
+//         });
+//       });
+//       console.error(err);
+//       res.status(500).json({
+//         error: true,
+//         message: err.message,
+//       });
+//     }
+//   })
+// );
 
 module.exports = router;

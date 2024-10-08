@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
     },
     facebookId: String,
     avatar: String,
+    avatar_base64_string: String,
     wechatId: String,
   },
   {

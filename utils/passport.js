@@ -29,7 +29,8 @@ passport.use(
     {
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: "http://localhost:5002/api/v1/user/auth/facebook/callback",
+      callbackURL:
+        "https://aora-ai-5hb5.onrender.com/api/v1/user/auth/facebook/callback",
       profileFields: ["id", "emails", "name"],
     },
     async (accessToken, refreshToken, profile, done) => {

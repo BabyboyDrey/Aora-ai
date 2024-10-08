@@ -12,6 +12,9 @@ router.post(
   asyncErrCatcher(async (req, res, next) => {
     try {
       const { userPrompt } = req.body;
+      if (!userPrompt) {
+        throw new Error("User prompt invalid or  not provided!");
+      }
       console.log("req.body:", userPrompt, req.body);
       const { designBookId } = req.params;
       console.log("designBookId:", designBookId, "req.user.id:", req.user.id);

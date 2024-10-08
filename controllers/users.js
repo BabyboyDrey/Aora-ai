@@ -16,6 +16,7 @@ const OAuthToken = require("../models/oauthToken.js");
 const deletePreviousSessions = require("../utils/deleteSessions.js");
 const ZhipuAI = require("../utils/zhipuAi.js");
 const { Prompt } = require("twilio/lib/twiml/VoiceResponse.js");
+const path = require("path");
 
 router.post(
   "/zhipu-prompt",
@@ -581,15 +582,29 @@ router.put(
         });
       }
 
-      user.avatar = req.file.filename;
-      user.updatedAt = new Date(Date.now());
+      const imagePath = path.join(__dirname, `uploads/${req.file.filename}`);
+      fs.readFile(imagePath, async (err, data) => {
+        if (err) {
+          console.error("Error reading image file:", err);
+          return res.status(500).json({
+            error: true,
+            message: "Error reading image file",
+          });
+        }
 
-      await user.save();
+        const base64Image = data.toString("base64");
 
-      res.status(200).json({
-        success: true,
-        message: "User avatar updated successfully",
-        avatar: user.avatar,
+        user.avatar = req.file.filename;
+        user.avatar_base64_string = base64Image;
+        user.updatedAt = new Date(Date.now());
+
+        await user.save();
+
+        res.status(200).json({
+          success: true,
+          message: "User avatar updated successfully",
+          avatar: base64Image,
+        });
       });
     } catch (err) {
       await new Promise((resolve, reject) => {

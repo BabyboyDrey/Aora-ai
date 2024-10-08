@@ -17,7 +17,7 @@ const deletePreviousSessions = require("../utils/deleteSessions.js");
 const ZhipuAI = require("../utils/zhipuAi.js");
 const { Prompt } = require("twilio/lib/twiml/VoiceResponse.js");
 const path = require("path");
-const fs = require("fs");
+const fs = require("fs/promises");
 
 router.post(
   "/zhipu-prompt",

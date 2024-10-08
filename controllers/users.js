@@ -596,11 +596,16 @@ router.put(
         base64Image = data.toString("base64");
         console.log("File read successfully, base64Image:", base64Image);
       } catch (err) {
-        console.error("Error reading image file:", err);
-        return res.status(500).json({
-          error: true,
-          message: "Error reading image file",
-        });
+        if (err.code === "ENOENT") {
+          console.warn("File not found, skipping base64 conversion.");
+          base64Image = null;
+        } else {
+          console.error("Error reading image file:", err);
+          return res.status(500).json({
+            error: true,
+            message: "Error processing image file",
+          });
+        }
       }
 
       user.avatar = req.file.filename;

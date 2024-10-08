@@ -1134,8 +1134,6 @@ router.post(
 
       res.status(200).json({
         success: true,
-        message: `Images saved as ${outputFilePath}`,
-        style_name: output_image_name,
         style_images: base64images,
         response: response.data.images_info,
       });

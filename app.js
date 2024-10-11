@@ -59,7 +59,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/", express.static("uploads"));
+app.use("/uploads", express.static("uploads"));
+app.use("/output-uploads", express.static("output_uploads"));
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/brandProfile", brandProfileRoutes);
 app.use("/api/v1/user/debo", designBookRoutes);

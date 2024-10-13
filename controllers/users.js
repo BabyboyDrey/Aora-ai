@@ -587,10 +587,21 @@ router.put(
       }
       console.log("starting processing");
 
-      const imagePath = path.join(__dirname, `uploads/${req.file.filename}`);
+      const imagePath = req.file.path;
       let base64Image;
+      console.log("imagePath:", imagePath);
 
-      // Use promises to read file asynchronously and wait for the result
+      try {
+        await fs.access(imagePath);
+        console.log("File exists at the expected path.");
+      } catch (err) {
+        console.error("File does not exist at the path:", imagePath);
+        return res.status(404).json({
+          error: true,
+          message: "File not found on server",
+        });
+      }
+
       try {
         const data = await fs.readFile(imagePath);
         base64Image = data.toString("base64");

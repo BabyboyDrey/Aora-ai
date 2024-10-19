@@ -13,6 +13,7 @@ const modelsRoutes = require("./controllers/models.js");
 const fashionRoutes = require("./controllers/fashion.js");
 const fabricRoutes = require("./controllers/fabric.js");
 const contentRoutes = require("./controllers/content.js");
+const designServiceRoutes = require("./controllers/designService.js");
 const morgan = require("morgan");
 const app = express();
 
@@ -68,6 +69,7 @@ app.use("/api/v1/user/model", modelsRoutes);
 app.use("/api/v1/user/fs", fashionRoutes);
 app.use("/api/v1/user/fabric", fabricRoutes);
 app.use("/api/v1/user/content", contentRoutes);
+app.use("/api/v1/user/deserv", designServiceRoutes);
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms")
 );

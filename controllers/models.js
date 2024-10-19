@@ -429,12 +429,11 @@ router.post(
       });
       console.log("found model", foundModel);
       if (!foundModel) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         console.error("No model found with id");
         throw new Error("No model found with id");
       }
@@ -445,12 +444,11 @@ router.post(
         !model_id ||
         !mongoose.Types.ObjectId.isValid(model_id)
       ) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         return res.status(400).json({
           error: true,
           message: "Invalid or no paramters provided!",
@@ -458,22 +456,20 @@ router.post(
       }
 
       if (!foundDesignBook) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         throw new Error("Design Book not found");
       }
 
       if (!req.file) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         throw new Error("Missing required image");
       }
 
@@ -501,12 +497,11 @@ router.post(
         !response.data.images ||
         !response.data.images.length
       ) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         throw new Error("Invalid response from the API: Missing image data.");
       }
       const imageData = response.data.images[0];
@@ -529,15 +524,13 @@ router.post(
 
       let modelIndex;
       if (foundModel) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(
-            `output_uploads/${req.file.originalname}`,
-            (err) => {
-              if (err) reject(err);
-              else resolve();
-            }
-          );
-        });
+        await checkAndDeleteFile(
+          `output_uploads/${req.file.originalname}`,
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
 
         modelIndex = foundModel.model_image_name.indexOf(req.file.originalname);
         if (modelIndex !== -1) {
@@ -558,12 +551,11 @@ router.post(
       foundModel.model_image_name[modelIndex] = output_image_name;
       foundModel.updatedAt = new Date();
       await foundModel.save();
-      await new Promise((resolve, reject) => {
-        checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+      await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+        if (err) reject(err);
+        else resolve();
       });
+
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,
@@ -572,12 +564,11 @@ router.post(
         response: response.data.images_info,
       });
     } catch (err) {
-      await new Promise((resolve, reject) => {
-        checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+      await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+        if (err) reject(err);
+        else resolve();
       });
+
       console.error(err);
       next(err);
     }
@@ -605,12 +596,11 @@ router.post(
       });
       console.log("found model", foundModel);
       if (!foundModel) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         console.error("No model found with id");
         throw new Error("No model found with id");
       }
@@ -621,12 +611,11 @@ router.post(
         !model_id ||
         !mongoose.Types.ObjectId.isValid(model_id)
       ) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         return res.status(400).json({
           error: true,
           message: "Invalid or no paramters provided!",
@@ -634,22 +623,20 @@ router.post(
       }
 
       if (!foundDesignBook) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         throw new Error("Design Book not found");
       }
 
       if (!req.file) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         throw new Error("Missing required image");
       }
 
@@ -674,12 +661,11 @@ router.post(
         !response.data.images ||
         !response.data.images.length
       ) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
+        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
+
         throw new Error("Invalid response from the API: Missing image data.");
       }
       const imageData = response.data.images[0];
@@ -702,15 +688,13 @@ router.post(
 
       let modelIndex;
       if (foundModel) {
-        await new Promise((resolve, reject) => {
-          checkAndDeleteFile(
-            `output_uploads/${req.file.originalname}`,
-            (err) => {
-              if (err) reject(err);
-              else resolve();
-            }
-          );
-        });
+        await checkAndDeleteFile(
+          `output_uploads/${req.file.originalname}`,
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
 
         modelIndex = foundModel.model_image_name.indexOf(req.file.originalname);
         if (modelIndex !== -1) {
@@ -731,12 +715,11 @@ router.post(
       foundModel.model_image_name[modelIndex] = output_image_name;
       foundModel.updatedAt = new Date();
       await foundModel.save();
-      await new Promise((resolve, reject) => {
-        checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+      await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+        if (err) reject(err);
+        else resolve();
       });
+
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,
@@ -745,12 +728,11 @@ router.post(
         response: response.data.images_info,
       });
     } catch (err) {
-      await new Promise((resolve, reject) => {
-        checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+      await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+        if (err) reject(err);
+        else resolve();
       });
+
       console.error(err);
       next(err);
     }

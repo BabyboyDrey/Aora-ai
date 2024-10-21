@@ -28,7 +28,7 @@ router.get(
 router.post(
   "/create-design-service",
   userAuth,
-  upload.single("image"),
+  upload.single("serviceImage"),
   asyncErrCatcher(async (req, res, next) => {
     try {
       if (!req.file) {
@@ -38,79 +38,95 @@ router.post(
 
       const {
         serviceName,
-        aboutService,
-        standardPricing,
-        premiumPricing,
-        basicPricing,
+        serviceDescription,
+        serviceCategory,
+        basicPlan,
+        standardPlan,
+        premiumPlan,
       } = req.body;
+
       console.log(
         "req.body:",
         serviceName,
-        aboutService,
-        standardPricing,
-        premiumPricing,
-        basicPricing
+        serviceDescription,
+        basicPlan,
+        standardPlan,
+        premiumPlan
       );
 
       if (
         !serviceName ||
-        !aboutService ||
-        !standardPricing ||
-        !premiumPricing ||
-        !basicPricing
+        !serviceDescription ||
+        !serviceCategory ||
+        !basicPlan ||
+        !standardPlan ||
+        !premiumPlan
       ) {
-        checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
+        await new Promise((resolve, reject) => {
+          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
-
         throw new Error("Required parameters not provided or invalid!");
       }
 
-      let parsedStandardPricing, parsedPremiumPricing, parsedBasicPricing;
+      // Parse the pricing plans if they are strings
+      let parsedBasicPlan, parsedStandardPlan, parsedPremiumPlan;
       try {
-        parsedStandardPricing = JSON.parse(standardPricing);
-        parsedPremiumPricing = JSON.parse(premiumPricing);
-        parsedBasicPricing = JSON.parse(basicPricing);
+        parsedBasicPlan =
+          typeof basicPlan === "string" ? JSON.parse(basicPlan) : basicPlan;
+        parsedStandardPlan =
+          typeof standardPlan === "string"
+            ? JSON.parse(standardPlan)
+            : standardPlan;
+        parsedPremiumPlan =
+          typeof premiumPlan === "string"
+            ? JSON.parse(premiumPlan)
+            : premiumPlan;
       } catch (parseError) {
-        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
+        await new Promise((resolve, reject) => {
+          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
-
         throw new Error("Invalid JSON format in pricing fields!");
       }
 
       console.log(
         "Parsed pricing:",
-        parsedStandardPricing,
-        parsedPremiumPricing,
-        parsedBasicPricing
+        parsedBasicPlan,
+        parsedStandardPlan,
+        parsedPremiumPlan
       );
-      console.log("started processing logic");
+
       const foundService = await designService.findOne({
         serviceName,
       });
       console.log("foundService?:", foundService ? true : false);
 
       if (foundService) {
-        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
+        await new Promise((resolve, reject) => {
+          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
-
         throw new Error("Service exists with this name");
       }
-      console.log("Passed found service check!");
 
       const newDesignService = await designService.create({
         userId: req.user.id,
         serviceName,
-        aboutService,
-        image: req.file.filename,
-        standardPricing: parsedStandardPricing,
-        premiumPricing: parsedPremiumPricing,
-        basicPricing: parsedBasicPricing,
+        serviceDescription,
+        serviceCategory,
+        serviceImage: req.file.filename,
+        plans: {
+          basicPlan: parsedBasicPlan,
+          standardPlan: parsedStandardPlan,
+          premiumPlan: parsedPremiumPlan,
+        },
       });
       console.log("newDesignService:", newDesignService);
 
@@ -120,9 +136,11 @@ router.post(
       });
     } catch (err) {
       if (req.file) {
-        await checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
-          if (err) reject(err);
-          else resolve();
+        await new Promise((resolve, reject) => {
+          checkAndDeleteFile(`uploads/${req.file.filename}`, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
       }
       console.error(err);

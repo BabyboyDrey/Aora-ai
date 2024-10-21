@@ -14,6 +14,7 @@ const modelsSchema = new mongoose.Schema(
     model_image_name: [String],
     background_image: String,
     pose_image: String,
+    userModelPrompt: Object,
   },
   {
     timestamps: true,

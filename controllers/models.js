@@ -191,6 +191,14 @@ router.post(
         model_image_name: imagePaths ? imagePaths : outputFilePaths,
         model_images: base64images,
         model_uuid,
+        userModelPrompt: {
+          age,
+          ethnicity,
+          look,
+          gender,
+          body_shape,
+          expression,
+        },
       });
 
       res.status(200).json({
@@ -385,6 +393,14 @@ router.post(
         pose_image: req.files["pose_image"][0].filename,
         model_image_name: imagePaths ? imagePaths : outputFilePaths,
         model_uuid,
+        userModelPrompt: {
+          age,
+          ethnicity,
+          look,
+          gender,
+          body_shape,
+          expression,
+        },
       });
 
       res.status(200).json({

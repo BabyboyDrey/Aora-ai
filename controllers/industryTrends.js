@@ -31,7 +31,8 @@ router.get(
       console.log(allStylesImageName);
 
       const results = await convertImagePaths2Base64Uris(
-        allStylesImageName.allImageName
+        allStylesImageName.allImageName,
+        "style"
       );
 
       res.json({
@@ -65,7 +66,8 @@ router.get(
       console.log(allClothingImageName);
 
       const results = await convertImagePaths2Base64Uris(
-        allClothingImageName.allImageName
+        allClothingImageName.allImageName,
+        "clothing"
       );
 
       res.json({
@@ -98,7 +100,8 @@ router.get(
       console.log(allModelsImageName);
 
       const results = await convertImagePaths2Base64Uris(
-        allModelsImageName.allImageName
+        allModelsImageName.allImageName,
+        "model"
       );
 
       res.json({
@@ -134,7 +137,8 @@ router.get(
         allFabricsImageName.allImageName
       );
       const results = await convertImagePaths2Base64Uris(
-        allFabricsImageName.allImageName
+        allFabricsImageName.allImageName,
+        "fabric"
       );
 
       res.json({

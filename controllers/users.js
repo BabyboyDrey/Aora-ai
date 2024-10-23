@@ -18,6 +18,15 @@ const ZhipuAI = require("../utils/zhipuAi.js");
 const { Prompt } = require("twilio/lib/twiml/VoiceResponse.js");
 const path = require("path");
 const fs = require("fs/promises");
+const brandProfile = require("../models/brandProfile.js");
+const designBook = require("../models/designBook.js");
+const clothings = require("../models/clothings.js");
+const designService = require("../models/designService.js");
+const fabric = require("../models/fabric.js");
+const imageContent = require("../models/imageContent.js");
+const models = require("../models/models.js");
+const styles = require("../models/styles.js");
+const textContent = require("../models/textContent.js");
 
 router.post(
   "/zhipu-prompt",
@@ -497,6 +506,55 @@ router.get(
   }
 );
 
+router.post(
+  "/auth-reset-password",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    try {
+      const { currentPassword, confirmPassword, newPassword } = req.body;
+
+      const foundUser = await Users.findOne({
+        _id: req.user.id,
+      });
+
+      if (!foundUser) {
+        throw new Error("User do not exist!");
+      }
+
+      const verifiedPassword = await bcrypt.compare(
+        currentPassword,
+        foundUser.password
+      );
+
+      if (!verifiedPassword) {
+        throw new Error("Current Password is incoorect! Please try again.");
+      }
+
+      if (newPassword !== confirmPassword) {
+        throw new Error("New password and confirm password does not match!");
+      }
+
+      if (newPassword === currentPassword) {
+        throw new Error("New password cannot be same as old password");
+      }
+
+      const salt = await bcrypt.genSalt(12);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      foundUser.password = hashedPassword;
+      await foundUser.save();
+
+      res.json({
+        success: true,
+        message: "New password saved!",
+      });
+    } catch (err) {
+      console.error(err);
+      next(err.message);
+    }
+  })
+);
+
 router.get(
   "/logout",
   userAuth,
@@ -538,6 +596,498 @@ router.get(
           message: "Failed to delete oauth tokens hence failed to log out",
         });
       });
+  })
+);
+
+router.delete(
+  "/delete-user-avatar",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    async function safelyDeleteFiles(files) {
+      try {
+        console.log("files:", files);
+        await Promise.all(
+          files.map(async (file) => {
+            await checkAndDeleteFile(`uploads/${file}`, (err) => {
+              if (err) {
+                console.error(`Error deleting file: ${file}`, err);
+                reject(err);
+              } else {
+                resolve();
+              }
+            });
+          })
+        );
+      } catch (err) {
+        console.error("File deletion encountered errors", err);
+      }
+    }
+
+    try {
+      const foundUser = await Users.findById(req.user.id);
+      if (!foundUser) {
+        throw new Error("No user found!");
+      }
+      console.log("avatarPath:", foundUser.avatar);
+
+      if (!foundUser.avatar) {
+        throw new Error("Forbidden Action: No user avatar!");
+      }
+
+      if (foundUser.avatar) {
+        await safelyDeleteFiles([foundUser.avatar]);
+      }
+      console.log("deleted image path successfully!");
+      foundUser.avatar = "";
+      foundUser.avatar_base64_string = "";
+      await foundUser.save();
+
+      res.json({
+        success: true,
+        message: "Avatar deleted!",
+      });
+    } catch (err) {
+      console.error(err);
+      next(err.message);
+    }
+  })
+);
+
+// Route to delete user account
+// router.delete(
+//   "/delete-user-account",
+//   userAuth,
+//   asyncErrCatcher(async (req, res, next) => {
+//     async function safelyDeleteFiles(files, location) {
+//       const deletePromises = files.map((file) => {
+//         console.log(`Deleting file: ${file} under  ${location}`);
+//         return new Promise((resolve, reject) => {
+//           checkAndDeleteFile(`${location}/${file}`, (err) => {
+//             if (err) {
+//               console.error(`Error deleting file: ${file}`, err);
+//               reject(err);
+//             } else {
+//               resolve();
+//             }
+//           });
+//         });
+//       });
+//       return Promise.all(deletePromises);
+//     }
+
+//     async function deleteUserModels(userIds, userInstance) {
+//       console.log(`Deeleting models: ${userIds}`);
+//       return userInstance.deleteMany({ _id: { $in: userIds } });
+//     }
+
+//     async function deleteImages(modelInstance, modelName) {
+//       const deleteTasks = modelInstance.map(async (instance) => {
+//         const imagesToDelete = [];
+
+//         switch (modelName) {
+//           case "designBook":
+//             imagesToDelete.push(...instance.imagesSavedFromWebPack);
+//             break;
+//           case "clothing":
+//             imagesToDelete.push(...instance.clothing_image_name);
+//             if (instance.input_image) imagesToDelete.push(instance.input_image);
+//             if (instance.style_image) imagesToDelete.push(instance.style_image);
+//             break;
+//           case "designService":
+//             if (instance.serviceImage)
+//               imagesToDelete.push(instance.serviceImage);
+//             break;
+//           case "fabric":
+//             if (instance.fabricImageName)
+//               imagesToDelete.push(instance.fabricImageName);
+//             break;
+//           case "imageContent":
+//             if (instance.imageName) imagesToDelete.push(instance.imageName);
+//             break;
+//           case "model":
+//             imagesToDelete.push(...instance.model_image_name);
+//             if (instance.background_image)
+//               imagesToDelete.push(instance.background_image);
+//             if (instance.pose_image) imagesToDelete.push(instance.pose_image);
+//             break;
+//           case "style":
+//             imagesToDelete.push(...instance.style_image_name);
+//             if (instance.input_image) imagesToDelete.push(instance.input_image);
+//             if (instance.style_image) imagesToDelete.push(instance.style_image);
+//             break;
+//           default:
+//             break;
+//         }
+//         console.log("imagesToDelete:", imagesToDelete);
+//         if (imagesToDelete.length > 0) {
+//           const location =
+//             modelName === "clothing" || modelName === "model"
+//               ? "output_uploads"
+//               : "uploads";
+//           await safelyDeleteFiles(imagesToDelete, location);
+//         }
+//       });
+
+//       await Promise.all(deleteTasks);
+//     }
+//     try {
+//       const foundUser = await Users.findById(req.user.id);
+//       if (!foundUser) {
+//         throw new Error("No user found!");
+//       }
+
+//       await Users.deleteOne({ _id: foundUser._id });
+
+//       const [
+//         foundBrandProfiles,
+//         foundDesignBooks,
+//         foundClothings,
+//         foundDesignServices,
+//         foundFabrics,
+//         foundImageContents,
+//         foundModels,
+//         foundStyles,
+//         foundTextContents,
+//       ] = await Promise.all([
+//         brandProfile.find({ userId: req.user.id }),
+//         designBook.find({ userId: req.user.id }),
+//         clothings.find({ userId: req.user.id }),
+//         designService.find({ userId: req.user.id }),
+//         fabric.find({ userId: req.user.id }),
+//         imageContent.find({ userId: req.user.id }),
+//         models.find({ userId: req.user.id }),
+//         styles.find({ userId: req.user.id }),
+//         textContent.find({ userId: req.user.id }),
+//       ]);
+
+//       await Promise.all([
+//         foundBrandProfiles.length > 0 &&
+//           deleteUserModels(
+//             foundBrandProfiles.map((profile) => profile._id),
+//             brandProfile
+//           ),
+//         foundDesignBooks.length > 0 &&
+//           (await deleteImages(foundDesignBooks, "designBook")) &&
+//           deleteUserModels(
+//             foundDesignBooks.map((book) => book._id),
+//             designBook
+//           ),
+//         foundClothings.length > 0 &&
+//           (await deleteImages(foundClothings, "clothing")) &&
+//           deleteUserModels(
+//             foundClothings.map((clothing) => clothing._id),
+//             clothings
+//           ),
+//         foundDesignServices.length > 0 &&
+//           (await deleteImages(foundDesignServices, "designService")) &&
+//           deleteUserModels(
+//             foundDesignServices.map((service) => service._id),
+//             designService
+//           ),
+//         foundFabrics.length > 0 &&
+//           (await deleteImages(foundFabrics, "fabric")) &&
+//           deleteUserModels(
+//             foundFabrics.map((fabric) => fabric._id),
+//             fabric
+//           ),
+//         foundImageContents.length > 0 &&
+//           (await deleteImages(foundImageContents, "imageContent")) &&
+//           deleteUserModels(
+//             foundImageContents.map((content) => content._id),
+//             imageContent
+//           ),
+//         foundModels.length > 0 &&
+//           (await deleteImages(foundModels, "model")) &&
+//           deleteUserModels(
+//             foundModels.map((model) => model._id),
+//             models
+//           ),
+//         foundStyles.length > 0 &&
+//           (await deleteImages(foundStyles, "style")) &&
+//           deleteUserModels(
+//             foundStyles.map((style) => style._id),
+//             styles
+//           ),
+//         foundTextContents.length > 0 &&
+//           deleteUserModels(
+//             foundTextContents.map((content) => content._id),
+//             textContent
+//           ),
+//       ]);
+
+//       res.json({
+//         success: true,
+//         message: "User account successfully deleted!",
+//       });
+//     } catch (err) {
+//       console.error(err);
+//       next(err.message);
+//     }
+//   })
+// );
+
+router.delete(
+  "/delete-user-account",
+  userAuth,
+  asyncErrCatcher(async (req, res, next) => {
+    async function safelyDeleteFiles(files, location) {
+      try {
+        if (location === "output_uploads") {
+          await Promise.all(
+            files.map(async (file) => {
+              await new Promise((resolve, reject) => {
+                checkAndDeleteFile(`output_uploads/${file}`, (err) => {
+                  if (err) {
+                    console.error(`Error deleting file: ${file}`, err);
+                    reject(err);
+                  } else {
+                    resolve();
+                  }
+                });
+              });
+            })
+          );
+        } else {
+          await Promise.all(
+            files.map(async (file) => {
+              await new Promise((resolve, reject) => {
+                checkAndDeleteFile(`uploads/${file}`, (err) => {
+                  if (err) {
+                    console.error(`Error deleting file: ${file}`, err);
+                    reject(err);
+                  } else {
+                    resolve();
+                  }
+                });
+              });
+            })
+          );
+        }
+      } catch (err) {
+        console.error("File deletion encountered errors", err);
+      }
+    }
+    async function deleteUserModels(userIds, isArray, userInstance) {
+      let query = [];
+      if (!isArray) {
+        query = [userIds];
+      } else {
+        query = userIds;
+      }
+
+      const deletedUsers = await userInstance.deleteMany({
+        _id: { $in: query },
+      });
+      console.log("deletedUsers:", deletedUsers);
+    }
+    async function deleteImages(modelInstance, modelName) {
+      if (modelName === "designBook") {
+        for (const instance of modelInstance) {
+          if (instance.imagesSavedFromWebPack.length > 0) {
+            await safelyDeleteFiles(instance.imagesSavedFromWebPack);
+          }
+        }
+      }
+      if (modelName === "clothing") {
+        for (const instance of modelInstance) {
+          if (instance.clothing_image_name.length > 0) {
+            await safelyDeleteFiles(
+              instance.clothing_image_name,
+              "output_uploads"
+            );
+          }
+          if (instance.input_image || instance.style_image) {
+            await safelyDeleteFiles([instance.input_image], "uploads");
+            await safelyDeleteFiles([instance.style_image], "uploads");
+          }
+        }
+      }
+      if (modelName === "designService") {
+        for (const instance of modelInstance) {
+          if (instance.serviceImage) {
+            await safelyDeleteFiles([instance.serviceImage], "uploads");
+          }
+        }
+      }
+      if (modelName === "fabric") {
+        for (const instance of modelInstance) {
+          if (instance.fabricImageName) {
+            await safelyDeleteFiles([instance.fabricImageName]);
+          }
+        }
+      }
+      if (modelName === "imageContent") {
+        for (const instance of modelInstance) {
+          if (instance.imageName) {
+            await safelyDeleteFiles([instance.imageName]);
+          }
+        }
+      }
+      if (modelName === "model") {
+        for (const instance of modelInstance) {
+          if (instance.model_image_name.length > 0) {
+            await safelyDeleteFiles(
+              instance.model_image_name,
+              "output_uploads"
+            );
+          }
+          if (instance.background_image || instance.pose_image) {
+            await safelyDeleteFiles([instance.background_image], "uploads");
+            await safelyDeleteFiles([instance.pose_image], "uploads");
+          }
+        }
+      }
+      if (modelName === "style") {
+        for (const instance of modelInstance) {
+          if (instance.style_image_name.length > 0) {
+            await safelyDeleteFiles(
+              instance.style_image_name,
+              "output_uploads"
+            );
+          }
+          if (instance.input_image || instance.style_image) {
+            await safelyDeleteFiles([instance.input_image], "uploads");
+            await safelyDeleteFiles([instance.style_image], "uploads");
+          }
+        }
+      }
+    }
+    try {
+      const foundUser = await Users.findById(req.user.id);
+      if (!foundUser) {
+        throw new Error("No user found!");
+      }
+
+      await Users.deleteOne({ _id: foundUser._id });
+
+      const foundBrandProfiles = await brandProfile.find({
+        userId: req.user.id,
+      });
+
+      const foundDesignBooks = await designBook.find({
+        userId: req.user.id,
+      });
+      const foundClothings = await clothings.find({
+        userId: req.user.id,
+      });
+      const foundDesignServices = await designService.find({
+        userId: req.user.id,
+      });
+      const foundFabrics = await fabric.find({
+        userId: req.user.id,
+      });
+      const foundImageContents = await imageContent.find({
+        userId: req.user.id,
+      });
+      const foundModels = await models.find({
+        userId: req.user.id,
+      });
+      const foundstyles = await styles.find({
+        userId: req.user.id,
+      });
+      const foundTextContents = await textContent.find({
+        userId: req.user.id,
+      });
+
+      if (foundBrandProfiles.length > 0) {
+        const brandProfileIds = foundBrandProfiles.map(
+          (profile) => profile._id
+        );
+
+        await deleteUserModels(brandProfileIds, true, foundBrandProfiles);
+      } else {
+        await deleteUserModels([foundUser._id], false, foundBrandProfiles);
+      }
+
+      if (foundDesignBooks.length > 0) {
+        const designBookIds = foundDesignBooks.map((profile) => profile._id);
+
+        await deleteImages(foundDesignBooks, "designBook");
+
+        await deleteUserModels(designBookIds, true, foundDesignBooks);
+      } else {
+        await deleteImages(foundDesignBooks, "designBook");
+        await deleteUserModels([foundUser._id], false, foundDesignBooks);
+      }
+      if (foundClothings.length > 0) {
+        const clothingIds = foundClothings.map((profile) => profile._id);
+        await deleteImages(foundClothings, "clothing");
+
+        await deleteUserModels(clothingIds, true, foundClothings);
+      } else {
+        await deleteImages(foundClothings, "clothing");
+
+        await deleteUserModels([foundUser._id], false, foundClothings);
+      }
+      if (foundDesignServices.length > 0) {
+        const designServices = foundDesignServices.map(
+          (profile) => profile._id
+        );
+        await deleteImages(foundDesignServices, "designService");
+
+        await deleteUserModels(designServices, true, foundDesignServices);
+      } else {
+        await deleteImages(foundDesignServices, "designService");
+
+        await deleteUserModels([foundUser._id], false, foundDesignServices);
+      }
+      if (foundFabrics.length > 0) {
+        const fabrics = foundFabrics.map((profile) => profile._id);
+        await deleteImages(foundFabrics, "fabrics");
+
+        await deleteUserModels(fabrics, true, foundFabrics);
+      } else {
+        await deleteImages(foundFabrics, "fabric");
+
+        await deleteUserModels([foundUser._id], false, foundFabrics);
+      }
+      if (foundImageContents.length > 0) {
+        const imageContents = foundImageContents.map((profile) => profile._id);
+        await deleteImages(foundImageContents, "imageContent");
+
+        await deleteUserModels(imageContents, true, foundImageContents);
+      } else {
+        await deleteImages(foundImageContents, "imageContent");
+
+        await deleteUserModels([foundUser._id], false, foundImageContents);
+      }
+      if (foundModels.length > 0) {
+        const models = foundModels.map((profile) => profile._id);
+        await deleteImages(foundModels, "model");
+
+        await deleteUserModels(models, true, foundModels);
+      } else {
+        await deleteImages(foundModels, "model");
+
+        await deleteUserModels([foundUser._id], false, foundModels);
+      }
+      if (foundstyles.length > 0) {
+        const styles = foundstyles.map((profile) => profile._id);
+        await deleteImages(foundstyles, "style");
+
+        await deleteUserModels(styles, true, foundstyles);
+      } else {
+        await deleteImages(foundstyles, "style");
+
+        await deleteUserModels([foundUser._id], false, foundstyles);
+      }
+      if (foundTextContents.length > 0) {
+        const textContents = foundTextContents.map((profile) => profile._id);
+        await deleteImages(foundTextContents, "textContent");
+
+        await deleteUserModels(textContents, true, foundTextContents);
+      } else {
+        await deleteUserModels([foundUser._id], false, foundTextContents);
+      }
+
+      res.json({
+        success: true,
+        message: "User account successfully deleted!",
+      });
+    } catch (err) {
+      console.error(err);
+      next(err.message);
+    }
   })
 );
 
@@ -605,7 +1155,6 @@ router.put(
       try {
         const data = await fs.readFile(imagePath);
         base64Image = data.toString("base64");
-        console.log("File read successfully, base64Image:", base64Image);
       } catch (err) {
         if (err.code === "ENOENT") {
           console.warn("File not found, skipping base64 conversion.");
@@ -622,7 +1171,12 @@ router.put(
       user.avatar = req.file.filename;
       user.avatar_base64_string = base64Image;
       user.updatedAt = new Date(Date.now());
+      await checkAndDeleteFile(`uploads/${user.avatar}`, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
 
+      console.log("user avatar deleted from filesystem");
       await user.save();
       console.log("user after update:", user);
 

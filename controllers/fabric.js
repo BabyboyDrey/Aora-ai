@@ -10,6 +10,7 @@ const path = require("path");
 const fs = require("fs");
 const router = require("express").Router();
 const FormData = require("form-data");
+const notifications = require("../models/notifications");
 
 router.post(
   "/create-fabric/:designBookId",
@@ -40,7 +41,12 @@ router.post(
         designBookId,
         fabricImageName: req.file.filename,
       });
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created a fabric",
+        briefModelType: "Fabric",
+        idOfCausingActivity: newFabric._id,
+      });
       res.status(200).json({
         success: true,
         message: "Fabric created successfully",
@@ -181,7 +187,12 @@ router.post(
       foundFabric.fabricUuid = response.data.images_info[0].image_uuid;
       foundFabric.updatedAt = new Date();
       await foundFabric.save();
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Changed fabric color",
+        briefModelType: "Fabric",
+        idOfCausingActivity: foundFabric._id,
+      });
       console.log("afta update", foundFabric);
 
       await checkAndDeleteFile(`uploads/${req.file.filename}`);

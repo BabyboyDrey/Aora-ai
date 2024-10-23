@@ -9,6 +9,7 @@ const models = require("../models/models");
 const fabric = require("../models/fabric");
 const designBook = require("../models/designBook");
 const { default: mongoose } = require("mongoose");
+const notifications = require("../models/notifications");
 const router = require("express").Router();
 
 router.get(
@@ -228,7 +229,12 @@ router.post(
 
       foundDesignBook.imagesSavedFromWebPack.push(imageName);
       await foundDesignBook.save();
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Saved new image to design book",
+        briefModelType: "Design Book",
+        idOfCausingActivity: foundDesignBook._id,
+      });
       res.json({
         success: true,
         message: "Model image saved successfully",

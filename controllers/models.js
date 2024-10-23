@@ -10,6 +10,7 @@ const { default: mongoose } = require("mongoose");
 const fs = require("fs");
 const axios = require("axios");
 const path = require("path");
+const notifications = require("../models/notifications");
 
 router.get("/test", userAuth, (req, res, next) => {
   return res.json({
@@ -200,7 +201,12 @@ router.post(
           expression,
         },
       });
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created a new model",
+        briefModelType: "Model",
+        idOfCausingActivity: new_model._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePaths}`,
@@ -402,7 +408,12 @@ router.post(
           expression,
         },
       });
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Swapped existing model for a new model",
+        briefModelType: "Model",
+        idOfCausingActivity: new_model._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePaths}`,
@@ -571,7 +582,12 @@ router.post(
         if (err) reject(err);
         else resolve();
       });
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Changed the background of an existing model",
+        briefModelType: "Model",
+        idOfCausingActivity: foundModel._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,
@@ -735,7 +751,12 @@ router.post(
         if (err) reject(err);
         else resolve();
       });
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Removed the background of an existing model",
+        briefModelType: "Model",
+        idOfCausingActivity: foundModel._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,
@@ -944,7 +965,12 @@ router.post(
         ),
         checkAndDeleteFile(`uploads/${req.files["mask_image"]?.[0]?.filename}`),
       ]);
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Used magic tool on an existing model",
+        briefModelType: "Model",
+        idOfCausingActivity: foundModel._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,
@@ -1112,7 +1138,12 @@ router.post(
       console.log("afta update", foundModel);
 
       await checkAndDeleteFile(`uploads/${req.file.filename}`);
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Changed color on an existing model",
+        briefModelType: "Model",
+        idOfCausingActivity: foundModel._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,

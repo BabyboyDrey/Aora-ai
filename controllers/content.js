@@ -12,6 +12,7 @@ const fs = require("fs");
 const { default: axios } = require("axios");
 const router = require("express").Router();
 const path = require("path");
+const notifications = require("../models/notifications");
 
 router.post(
   "/create-text-content/:designBookId",
@@ -97,6 +98,12 @@ router.post(
             (e) => e.subject === jsonData.subject
           );
           await foundTextContent.save();
+          await notifications.create({
+            userId: req.user.id,
+            brief: "Created text content",
+            briefModelType: "Text content",
+            idOfCausingActivity: foundTextContent._id,
+          });
           res.json({
             newTextContent,
           });
@@ -262,7 +269,12 @@ router.post(
           if (err) reject(err);
           else resolve();
         });
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created image content",
+        briefModelType: "Image content",
+        idOfCausingActivity: newImageContent._id,
+      });
       res.json({
         success: true,
         newImageFilePath: outputFilePath,

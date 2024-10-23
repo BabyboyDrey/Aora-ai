@@ -5,6 +5,7 @@ const userAuth = require("../middlewares/userAuth.js");
 const ZhipuAI = require("../utils/zhipuAi.js");
 const brandProfile = require("../models/brandProfile.js");
 const Pricing = require("twilio/lib/rest/Pricing.js");
+const notifications = require("../models/notifications.js");
 require("dotenv").config();
 
 router.post(
@@ -38,7 +39,12 @@ router.post(
         }
       }
       const created_brand = await Brandprofile.create(data);
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created a brand profile",
+        briefModelType: "Brand profile",
+        idOfCausingActivity: created_brand._id,
+      });
       res.status(200).json({
         success: true,
         message: "Brand profile created",
@@ -46,7 +52,7 @@ router.post(
       });
     } catch (err) {
       console.error(err);
-      res.status(200).json({
+      res.status(500).json({
         error: true,
         message: err.message,
       });
@@ -118,6 +124,12 @@ router.get(
         found_profile.trend_analysis = trendAnalysis;
         await found_profile.save();
 
+        await notifications.create({
+          userId: req.user.id,
+          brief: "Created brand profile's trend analysis",
+          briefModelType: "Brand profile",
+          idOfCausingActivity: found_profile._id,
+        });
         res.json({
           message: "Trend analysis updated successfully",
           trend_analysis: trendAnalysis,
@@ -235,6 +247,12 @@ router.get(
           found_profile.customer_personas = jsonResponse;
 
           await found_profile.save();
+          await notifications.create({
+            userId: req.user.id,
+            brief: "Created 3 brand profile customer perosnas",
+            briefModelType: "Brand profile",
+            idOfCausingActivity: found_profile._id,
+          });
 
           res.status(200).json({
             message: "Customer personas created successfully",
@@ -255,7 +273,12 @@ router.get(
             found_profile.customer_personas = jsonResponse;
 
             await found_profile.save();
-
+            await notifications.create({
+              userId: req.user.id,
+              brief: "Created 3 brand profile customer perosnas",
+              briefModelType: "Brand profile",
+              idOfCausingActivity: found_profile._id,
+            });
             res.status(200).json({
               message: "Customer personas created successfully",
               customer_personas: found_profile.customer_personas,
@@ -325,6 +348,12 @@ router.post(
       brandProfile.selected_customer_persona = foundCustomerPersona;
 
       await brandProfile.save();
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Selected 1 brand profile customer perosna",
+        briefModelType: "Brand profile",
+        idOfCausingActivity: brandProfile._id,
+      });
 
       res.json({
         result: brandProfile.selected_customer_persona,
@@ -535,6 +564,13 @@ router.get(
           console.log("Structured Pricing Analysis:", jsonResponse);
           brandProfile.pricing_analysis = jsonResponse;
           await brandProfile.save();
+          await notifications.create({
+            userId: req.user.id,
+            brief: "Created brand profile's pricing analysis",
+            briefModelType: "Brand profile",
+            idOfCausingActivity: brandProfile._id,
+          });
+
           res.json({
             message: "Pricing analysis created successfully",
             pricing_analysis: brandProfile.pricing_analysis,
@@ -555,6 +591,12 @@ router.get(
             );
             brandProfile.pricing_analysis = jsonResponse;
             await brandProfile.save();
+            await notifications.create({
+              userId: req.user.id,
+              brief: "Created brand profile's pricing analysis",
+              briefModelType: "Brand profile",
+              idOfCausingActivity: brandProfile._id,
+            });
 
             res.json({
               message: "Pricing analysis created successfully",
@@ -780,6 +822,13 @@ router.post(
           brandProfile.massive_transformational_purpose = items;
           brandProfile.suggestions_for_mtp = jsonResponse;
           await brandProfile.save();
+          await notifications.create({
+            userId: req.user.id,
+            brief: "Created brand profile's mtp",
+            briefModelType: "Brand profile",
+            idOfCausingActivity: brandProfile._id,
+          });
+
           res.json({
             message: "Suggestions created successfully",
             suggestions: jsonResponse,
@@ -799,6 +848,12 @@ router.post(
 
             brandProfile.massive_transformational_purpose = items;
             await brandProfile.save();
+            await notifications.create({
+              userId: req.user.id,
+              brief: "Created brand profile's mtp",
+              briefModelType: "Brand profile",
+              idOfCausingActivity: brandProfile._id,
+            });
             res.json({
               message: "Suggestions created successfully",
               suggestions: jsonResponse,

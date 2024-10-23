@@ -5,6 +5,7 @@ const clothings = require("../models/clothings");
 const DesignBook = require("../models/designBook");
 const fabric = require("../models/fabric");
 const models = require("../models/models");
+const notifications = require("../models/notifications");
 const styles = require("../models/styles");
 const textContent = require("../models/textContent");
 
@@ -36,9 +37,15 @@ router.post(
         });
       }
 
-      await DesignBook.create({
+      const newDesignBook = await DesignBook.create({
         book_name: designName,
         userId: req.user.id,
+      });
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created design book",
+        briefModelType: "Design book",
+        idOfCausingActivity: newDesignBook._id,
       });
       res.status(200).json({
         success: true,

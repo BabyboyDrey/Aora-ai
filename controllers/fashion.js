@@ -11,6 +11,7 @@ const router = require("express").Router();
 const FormData = require("form-data");
 const designBook = require("../models/designBook");
 const clothings = require("../models/clothings");
+const notifications = require("../models/notifications");
 
 router.get(
   "/test",
@@ -190,7 +191,12 @@ router.post(
         style_image_name: imagePaths ? imagePaths : outputFilePaths,
         style_image_uuid,
       });
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created a style",
+        briefModelType: "Style",
+        idOfCausingActivity: new_style._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePaths}`,
@@ -394,7 +400,12 @@ router.post(
           `uploads/${req.files["style_image"]?.[0]?.filename}`
         ),
       ]);
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Changed the style of an existing style",
+        briefModelType: "Style",
+        idOfCausingActivity: foundStyle._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,
@@ -600,6 +611,12 @@ router.post(
       });
 
       console.log("new_clothing", new_clothing);
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created a clothing",
+        briefModelType: "Clothing",
+        idOfCausingActivity: new_clothing._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePaths}`,
@@ -768,7 +785,12 @@ router.post(
       console.log("afta update", foundStyle);
 
       await checkAndDeleteFile(`uploads/${req.file.filename}`);
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Changed the color of an existing style",
+        briefModelType: "Style",
+        idOfCausingActivity: foundStyle._id,
+      });
       res.status(200).json({
         success: true,
         message: `Images saved as ${outputFilePath}`,
@@ -1296,7 +1318,12 @@ router.post(
       foundClothing.updatedAt = new Date();
       await foundClothing.save();
       console.log("afta update", foundClothing);
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Changed the color of an existing clothing",
+        briefModelType: "Clothing",
+        idOfCausingActivity: foundClothing._id,
+      });
       await checkAndDeleteFile(`uploads/${req.file.filename}`);
 
       res.status(200).json({

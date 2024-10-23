@@ -1,6 +1,7 @@
 const asyncErrCatcher = require("../middlewares/asyncErrCatcher");
 const userAuth = require("../middlewares/userAuth");
 const designService = require("../models/designService");
+const notifications = require("../models/notifications");
 const { upload } = require("../multer/multer_png");
 const checkAndDeleteFile = require("../utils/checkAndDeleteFile");
 
@@ -71,7 +72,6 @@ router.post(
         throw new Error("Required parameters not provided or invalid!");
       }
 
-      // Parse the pricing plans if they are strings
       let parsedBasicPlan, parsedStandardPlan, parsedPremiumPlan;
       try {
         parsedBasicPlan =
@@ -129,7 +129,12 @@ router.post(
         },
       });
       console.log("newDesignService:", newDesignService);
-
+      await notifications.create({
+        userId: req.user.id,
+        brief: "Created a design service",
+        briefModelType: "Design service",
+        idOfCausingActivity: newDesignService._id,
+      });
       res.json({
         success: true,
         newDesignService,

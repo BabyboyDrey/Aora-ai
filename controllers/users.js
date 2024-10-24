@@ -745,7 +745,7 @@ router.delete(
       }
       await Promise.all([
         deleteUserModels(allUserIds, brandProfile),
-        deleteImages(foundUser, "avatar"),
+        deleteImages([foundUser], "avatar"),
         deleteImages(foundBrandProfiles, "brandProfile"),
         deleteImages(foundDesignBooks, "designBook"),
         deleteImages(foundClothings, "clothing"),

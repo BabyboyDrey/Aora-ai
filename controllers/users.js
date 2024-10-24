@@ -17,7 +17,7 @@ const deletePreviousSessions = require("../utils/deleteSessions.js");
 const ZhipuAI = require("../utils/zhipuAi.js");
 const { Prompt } = require("twilio/lib/twiml/VoiceResponse.js");
 const path = require("path");
-const fs = require("fs/promises");
+const fs = require("fs").promises;
 const brandProfile = require("../models/brandProfile.js");
 const designBook = require("../models/designBook.js");
 const clothings = require("../models/clothings.js");
@@ -27,67 +27,6 @@ const imageContent = require("../models/imageContent.js");
 const models = require("../models/models.js");
 const styles = require("../models/styles.js");
 const textContent = require("../models/textContent.js");
-
-router.post(
-  "/zhipu-prompt",
-  asyncErrCatcher(async (req, res) => {
-    try {
-      const client = new ZhipuAI(process.env.ZHIPU_APP_KEY);
-      const prompt = "Tell me about the history of nigeria.";
-
-      async function getResponse() {
-        try {
-          const response = await client.chatCompletions(
-            "glm-4",
-            [
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            {
-              max_tokens: 500,
-              temperature: 0.7,
-              top_p: 0.9,
-            }
-          );
-          const cleanedMessage = response.choices[0].message.content
-            .replace(/\n/g, " ")
-            .trim();
-
-          console.log(cleanedMessage);
-          res.json({ content: cleanedMessage });
-
-          //  content = content.replace(/\n/g, " ");
-
-          //  // Example of additional formatting:
-          //  content = content
-          //    .replace(/ 1\. /g, "\n\n**1.** ") // Heading for the first section
-          //    .replace(/ 2\. /g, "\n\n**2.** ") // Heading for the second section
-          //    .replace(/ 3\. /g, "\n\n**3.** ") // and so on...
-          //    .replace(/ 4\. /g, "\n\n**4.** ")
-          //    .replace(/ 5\. /g, "\n\n**5.** ")
-          //    .replace(/ 6\. /g, "\n\n**6.** ")
-          //    .replace(/ 7\. /g, "\n\n**7.** ")
-          //    .replace(/    - /g, "\n\n- "); // Bullet points
-
-          //  console.log(content);
-          //  res.json({ content });
-        } catch (error) {
-          console.error("Failed to get response:", error);
-        }
-      }
-
-      getResponse();
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({
-        error: true,
-        message: err.message,
-      });
-    }
-  })
-);
 
 router.post(
   "/login",
@@ -653,278 +592,79 @@ router.delete(
   })
 );
 
-// Route to delete user account
-// router.delete(
-//   "/delete-user-account",
-//   userAuth,
-//   asyncErrCatcher(async (req, res, next) => {
-//     async function safelyDeleteFiles(files, location) {
-//       const deletePromises = files.map((file) => {
-//         console.log(`Deleting file: ${file} under  ${location}`);
-//         return new Promise((resolve, reject) => {
-//           checkAndDeleteFile(`${location}/${file}`, (err) => {
-//             if (err) {
-//               console.error(`Error deleting file: ${file}`, err);
-//               reject(err);
-//             } else {
-//               resolve();
-//             }
-//           });
-//         });
-//       });
-//       return Promise.all(deletePromises);
-//     }
-
-//     async function deleteUserModels(userIds, userInstance) {
-//       console.log(`Deeleting models: ${userIds}`);
-//       return userInstance.deleteMany({ _id: { $in: userIds } });
-//     }
-
-//     async function deleteImages(modelInstance, modelName) {
-//       const deleteTasks = modelInstance.map(async (instance) => {
-//         const imagesToDelete = [];
-
-//         switch (modelName) {
-//           case "designBook":
-//             imagesToDelete.push(...instance.imagesSavedFromWebPack);
-//             break;
-//           case "clothing":
-//             imagesToDelete.push(...instance.clothing_image_name);
-//             if (instance.input_image) imagesToDelete.push(instance.input_image);
-//             if (instance.style_image) imagesToDelete.push(instance.style_image);
-//             break;
-//           case "designService":
-//             if (instance.serviceImage)
-//               imagesToDelete.push(instance.serviceImage);
-//             break;
-//           case "fabric":
-//             if (instance.fabricImageName)
-//               imagesToDelete.push(instance.fabricImageName);
-//             break;
-//           case "imageContent":
-//             if (instance.imageName) imagesToDelete.push(instance.imageName);
-//             break;
-//           case "model":
-//             imagesToDelete.push(...instance.model_image_name);
-//             if (instance.background_image)
-//               imagesToDelete.push(instance.background_image);
-//             if (instance.pose_image) imagesToDelete.push(instance.pose_image);
-//             break;
-//           case "style":
-//             imagesToDelete.push(...instance.style_image_name);
-//             if (instance.input_image) imagesToDelete.push(instance.input_image);
-//             if (instance.style_image) imagesToDelete.push(instance.style_image);
-//             break;
-//           default:
-//             break;
-//         }
-//         console.log("imagesToDelete:", imagesToDelete);
-//         if (imagesToDelete.length > 0) {
-//           const location =
-//             modelName === "clothing" || modelName === "model"
-//               ? "output_uploads"
-//               : "uploads";
-//           await safelyDeleteFiles(imagesToDelete, location);
-//         }
-//       });
-
-//       await Promise.all(deleteTasks);
-//     }
-//     try {
-//       const foundUser = await Users.findById(req.user.id);
-//       if (!foundUser) {
-//         throw new Error("No user found!");
-//       }
-
-//       await Users.deleteOne({ _id: foundUser._id });
-
-//       const [
-//         foundBrandProfiles,
-//         foundDesignBooks,
-//         foundClothings,
-//         foundDesignServices,
-//         foundFabrics,
-//         foundImageContents,
-//         foundModels,
-//         foundStyles,
-//         foundTextContents,
-//       ] = await Promise.all([
-//         brandProfile.find({ userId: req.user.id }),
-//         designBook.find({ userId: req.user.id }),
-//         clothings.find({ userId: req.user.id }),
-//         designService.find({ userId: req.user.id }),
-//         fabric.find({ userId: req.user.id }),
-//         imageContent.find({ userId: req.user.id }),
-//         models.find({ userId: req.user.id }),
-//         styles.find({ userId: req.user.id }),
-//         textContent.find({ userId: req.user.id }),
-//       ]);
-
-//       await Promise.all([
-//         foundBrandProfiles.length > 0 &&
-//           deleteUserModels(
-//             foundBrandProfiles.map((profile) => profile._id),
-//             brandProfile
-//           ),
-//         foundDesignBooks.length > 0 &&
-//           (await deleteImages(foundDesignBooks, "designBook")) &&
-//           deleteUserModels(
-//             foundDesignBooks.map((book) => book._id),
-//             designBook
-//           ),
-//         foundClothings.length > 0 &&
-//           (await deleteImages(foundClothings, "clothing")) &&
-//           deleteUserModels(
-//             foundClothings.map((clothing) => clothing._id),
-//             clothings
-//           ),
-//         foundDesignServices.length > 0 &&
-//           (await deleteImages(foundDesignServices, "designService")) &&
-//           deleteUserModels(
-//             foundDesignServices.map((service) => service._id),
-//             designService
-//           ),
-//         foundFabrics.length > 0 &&
-//           (await deleteImages(foundFabrics, "fabric")) &&
-//           deleteUserModels(
-//             foundFabrics.map((fabric) => fabric._id),
-//             fabric
-//           ),
-//         foundImageContents.length > 0 &&
-//           (await deleteImages(foundImageContents, "imageContent")) &&
-//           deleteUserModels(
-//             foundImageContents.map((content) => content._id),
-//             imageContent
-//           ),
-//         foundModels.length > 0 &&
-//           (await deleteImages(foundModels, "model")) &&
-//           deleteUserModels(
-//             foundModels.map((model) => model._id),
-//             models
-//           ),
-//         foundStyles.length > 0 &&
-//           (await deleteImages(foundStyles, "style")) &&
-//           deleteUserModels(
-//             foundStyles.map((style) => style._id),
-//             styles
-//           ),
-//         foundTextContents.length > 0 &&
-//           deleteUserModels(
-//             foundTextContents.map((content) => content._id),
-//             textContent
-//           ),
-//       ]);
-
-//       res.json({
-//         success: true,
-//         message: "User account successfully deleted!",
-//       });
-//     } catch (err) {
-//       console.error(err);
-//       next(err.message);
-//     }
-//   })
-// );
-
 router.delete(
   "/delete-user-account",
   userAuth,
   asyncErrCatcher(async (req, res, next) => {
     async function safelyDeleteFiles(files, location) {
       try {
-        if (location === "output_uploads") {
-          await Promise.all(
-            files.map(async (file) => {
-              await new Promise((resolve, reject) => {
-                checkAndDeleteFile(`output_uploads/${file}`, (err) => {
-                  if (err) {
-                    console.error(`Error deleting file: ${file}`, err);
-                    reject(err);
-                  } else {
-                    resolve();
-                  }
-                });
-              });
-            })
-          );
-        } else {
-          await Promise.all(
-            files.map(async (file) => {
-              await new Promise((resolve, reject) => {
-                checkAndDeleteFile(`uploads/${file}`, (err) => {
-                  if (err) {
-                    console.error(`Error deleting file: ${file}`, err);
-                    reject(err);
-                  } else {
-                    resolve();
-                  }
-                });
-              });
-            })
-          );
-        }
+        const deletePromises = files.map(async (file) => {
+          const filePath = path.join(__dirname, "..", location, file);
+          console.log("Checking file path:", filePath);
+
+          try {
+            await fs.access(filePath);
+            console.log("File exists, proceeding to delete:", filePath);
+
+            await fs.unlink(filePath);
+            console.log("Deleted successfully:", filePath);
+          } catch (err) {
+            if (err.code === "ENOENT") {
+              console.warn(`File not found: ${filePath}`);
+            } else {
+              console.error(`Error accessing file: ${filePath}`, err);
+            }
+          }
+        });
+
+        await Promise.allSettled(deletePromises);
+        console.log("All deletion operations completed.");
       } catch (err) {
         console.error("File deletion encountered errors", err);
       }
     }
-    async function deleteUserModels(userIds, isArray, userInstance) {
-      let query = [];
-      if (!isArray) {
-        query = [userIds];
-      } else {
-        query = userIds;
-      }
 
+    async function deleteUserModels(userIds, userInstance) {
       const deletedUsers = await userInstance.deleteMany({
-        _id: { $in: query },
+        _id: { $in: userIds },
       });
       console.log("deletedUsers:", deletedUsers);
     }
+
     async function deleteImages(modelInstance, modelName) {
-      if (modelName === "designBook") {
-        for (const instance of modelInstance) {
+      const deletePromises = [];
+
+      modelInstance.forEach(async (instance) => {
+        if (modelName === "designBook") {
           if (instance.imagesSavedFromWebPack.length > 0) {
-            await safelyDeleteFiles(instance.imagesSavedFromWebPack);
+            await safelyDeleteFiles(instance.imagesSavedFromWebPack, "uploads");
           }
-        }
-      }
-      if (modelName === "clothing") {
-        for (const instance of modelInstance) {
+        } else if (modelName === "clothing") {
           if (instance.clothing_image_name.length > 0) {
             await safelyDeleteFiles(
               instance.clothing_image_name,
               "output_uploads"
             );
           }
-          if (instance.input_image || instance.style_image) {
+          if (instance.input_image) {
             await safelyDeleteFiles([instance.input_image], "uploads");
+          }
+          if (instance.style_image) {
             await safelyDeleteFiles([instance.style_image], "uploads");
           }
-        }
-      }
-      if (modelName === "designService") {
-        for (const instance of modelInstance) {
+        } else if (modelName === "designService") {
           if (instance.serviceImage) {
             await safelyDeleteFiles([instance.serviceImage], "uploads");
           }
-        }
-      }
-      if (modelName === "fabric") {
-        for (const instance of modelInstance) {
+        } else if (modelName === "fabric") {
           if (instance.fabricImageName) {
             await safelyDeleteFiles([instance.fabricImageName]);
           }
-        }
-      }
-      if (modelName === "imageContent") {
-        for (const instance of modelInstance) {
+        } else if (modelName === "imageContent") {
           if (instance.imageName) {
             await safelyDeleteFiles([instance.imageName]);
           }
-        }
-      }
-      if (modelName === "model") {
-        for (const instance of modelInstance) {
+        } else if (modelName === "model") {
           if (instance.model_image_name.length > 0) {
             await safelyDeleteFiles(
               instance.model_image_name,
@@ -935,10 +675,7 @@ router.delete(
             await safelyDeleteFiles([instance.background_image], "uploads");
             await safelyDeleteFiles([instance.pose_image], "uploads");
           }
-        }
-      }
-      if (modelName === "style") {
-        for (const instance of modelInstance) {
+        } else if (modelName === "style") {
           if (instance.style_image_name.length > 0) {
             await safelyDeleteFiles(
               instance.style_image_name,
@@ -950,135 +687,62 @@ router.delete(
             await safelyDeleteFiles([instance.style_image], "uploads");
           }
         }
-      }
+      });
+
+      await Promise.allSettled(deletePromises);
     }
+
     try {
       const foundUser = await Users.findById(req.user.id);
       if (!foundUser) {
         throw new Error("No user found!");
       }
 
-      await Users.deleteOne({ _id: foundUser._id });
-
       const foundBrandProfiles = await brandProfile.find({
         userId: req.user.id,
       });
-
-      const foundDesignBooks = await designBook.find({
-        userId: req.user.id,
-      });
-      const foundClothings = await clothings.find({
-        userId: req.user.id,
-      });
+      const foundDesignBooks = await designBook.find({ userId: req.user.id });
+      const foundClothings = await clothings.find({ userId: req.user.id });
       const foundDesignServices = await designService.find({
         userId: req.user.id,
       });
-      const foundFabrics = await fabric.find({
-        userId: req.user.id,
-      });
+      const foundFabrics = await fabric.find({ userId: req.user.id });
       const foundImageContents = await imageContent.find({
         userId: req.user.id,
       });
-      const foundModels = await models.find({
-        userId: req.user.id,
-      });
-      const foundstyles = await styles.find({
-        userId: req.user.id,
-      });
-      const foundTextContents = await textContent.find({
-        userId: req.user.id,
-      });
+      const foundModels = await models.find({ userId: req.user.id });
+      const foundStyles = await styles.find({ userId: req.user.id });
+      const foundTextContents = await textContent.find({ userId: req.user.id });
 
-      if (foundBrandProfiles.length > 0) {
-        const brandProfileIds = foundBrandProfiles.map(
-          (profile) => profile._id
-        );
+      const allUserIds = [
+        ...foundBrandProfiles.map((profile) => profile._id),
+        ...foundDesignBooks.map((book) => book._id),
+        ...foundClothings.map((clothing) => clothing._id),
+        ...foundDesignServices.map((service) => service._id),
+        ...foundFabrics.map((fabric) => fabric._id),
+        ...foundImageContents.map((content) => content._id),
+        ...foundModels.map((model) => model._id),
+        ...foundStyles.map((style) => style._id),
+        ...foundTextContents.map((text) => text._id),
+      ];
 
-        await deleteUserModels(brandProfileIds, true, foundBrandProfiles);
-      } else {
-        await deleteUserModels([foundUser._id], false, foundBrandProfiles);
+      if (allUserIds.length > 0) {
+        await deleteUserModels(allUserIds, brandProfile);
       }
-
-      if (foundDesignBooks.length > 0) {
-        const designBookIds = foundDesignBooks.map((profile) => profile._id);
-
-        await deleteImages(foundDesignBooks, "designBook");
-
-        await deleteUserModels(designBookIds, true, foundDesignBooks);
-      } else {
-        await deleteImages(foundDesignBooks, "designBook");
-        await deleteUserModels([foundUser._id], false, foundDesignBooks);
-      }
-      if (foundClothings.length > 0) {
-        const clothingIds = foundClothings.map((profile) => profile._id);
-        await deleteImages(foundClothings, "clothing");
-
-        await deleteUserModels(clothingIds, true, foundClothings);
-      } else {
-        await deleteImages(foundClothings, "clothing");
-
-        await deleteUserModels([foundUser._id], false, foundClothings);
-      }
-      if (foundDesignServices.length > 0) {
-        const designServices = foundDesignServices.map(
-          (profile) => profile._id
-        );
-        await deleteImages(foundDesignServices, "designService");
-
-        await deleteUserModels(designServices, true, foundDesignServices);
-      } else {
-        await deleteImages(foundDesignServices, "designService");
-
-        await deleteUserModels([foundUser._id], false, foundDesignServices);
-      }
-      if (foundFabrics.length > 0) {
-        const fabrics = foundFabrics.map((profile) => profile._id);
-        await deleteImages(foundFabrics, "fabrics");
-
-        await deleteUserModels(fabrics, true, foundFabrics);
-      } else {
-        await deleteImages(foundFabrics, "fabric");
-
-        await deleteUserModels([foundUser._id], false, foundFabrics);
-      }
-      if (foundImageContents.length > 0) {
-        const imageContents = foundImageContents.map((profile) => profile._id);
-        await deleteImages(foundImageContents, "imageContent");
-
-        await deleteUserModels(imageContents, true, foundImageContents);
-      } else {
-        await deleteImages(foundImageContents, "imageContent");
-
-        await deleteUserModels([foundUser._id], false, foundImageContents);
-      }
-      if (foundModels.length > 0) {
-        const models = foundModels.map((profile) => profile._id);
-        await deleteImages(foundModels, "model");
-
-        await deleteUserModels(models, true, foundModels);
-      } else {
-        await deleteImages(foundModels, "model");
-
-        await deleteUserModels([foundUser._id], false, foundModels);
-      }
-      if (foundstyles.length > 0) {
-        const styles = foundstyles.map((profile) => profile._id);
-        await deleteImages(foundstyles, "style");
-
-        await deleteUserModels(styles, true, foundstyles);
-      } else {
-        await deleteImages(foundstyles, "style");
-
-        await deleteUserModels([foundUser._id], false, foundstyles);
-      }
-      if (foundTextContents.length > 0) {
-        const textContents = foundTextContents.map((profile) => profile._id);
-        await deleteImages(foundTextContents, "textContent");
-
-        await deleteUserModels(textContents, true, foundTextContents);
-      } else {
-        await deleteUserModels([foundUser._id], false, foundTextContents);
-      }
+      await Promise.all([
+        deleteUserModels(allUserIds, brandProfile),
+        deleteImages(foundBrandProfiles, "brandProfile"),
+        deleteImages(foundDesignBooks, "designBook"),
+        deleteImages(foundClothings, "clothing"),
+        deleteImages(foundDesignServices, "designService"),
+        deleteImages(foundFabrics, "fabric"),
+        deleteImages(foundImageContents, "imageContent"),
+        deleteImages(foundModels, "model"),
+        deleteImages(foundStyles, "style"),
+        deleteImages(foundTextContents, "textContent"),
+      ]);
+      await Users.deleteOne({ _id: foundUser._id });
+      console.log("Deleted user and user data successfully!");
 
       res.json({
         success: true,

@@ -727,7 +727,17 @@ router.delete(
       ];
 
       if (allUserIds.length > 0) {
-        await deleteUserModels(allUserIds, brandProfile);
+        await Promise.all([
+          deleteUserModels(allUserIds, brandProfile),
+          deleteUserModels(allUserIds, designBook),
+          deleteUserModels(allUserIds, clothings),
+          deleteUserModels(allUserIds, designService),
+          deleteUserModels(allUserIds, fabric),
+          deleteUserModels(allUserIds, imageContent),
+          deleteUserModels(allUserIds, models),
+          deleteUserModels(allUserIds, styles),
+          deleteUserModels(allUserIds, textContent),
+        ]);
       }
       await Promise.all([
         deleteUserModels(allUserIds, brandProfile),

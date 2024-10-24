@@ -686,6 +686,10 @@ router.delete(
             await safelyDeleteFiles([instance.input_image], "uploads");
             await safelyDeleteFiles([instance.style_image], "uploads");
           }
+        } else if (modelName === "avatar") {
+          if (instance.avatar) {
+            await safelyDeleteFiles([instance.avatar], "uploads");
+          }
         }
       });
 
@@ -741,6 +745,7 @@ router.delete(
       }
       await Promise.all([
         deleteUserModels(allUserIds, brandProfile),
+        deleteImages(foundUser, "avatar"),
         deleteImages(foundBrandProfiles, "brandProfile"),
         deleteImages(foundDesignBooks, "designBook"),
         deleteImages(foundClothings, "clothing"),
@@ -751,6 +756,9 @@ router.delete(
         deleteImages(foundStyles, "style"),
         deleteImages(foundTextContents, "textContent"),
       ]);
+      if (foundUser.avatar) {
+        await fs.unlink();
+      }
       await Users.deleteOne({ _id: foundUser._id });
       console.log("Deleted user and user data successfully!");
 

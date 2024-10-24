@@ -756,9 +756,7 @@ router.delete(
         deleteImages(foundStyles, "style"),
         deleteImages(foundTextContents, "textContent"),
       ]);
-      if (foundUser.avatar) {
-        await fs.unlink();
-      }
+
       await Users.deleteOne({ _id: foundUser._id });
       console.log("Deleted user and user data successfully!");
 

@@ -163,7 +163,10 @@ router.get(
         userId: req.user.id,
       });
       if (foundDesignServices.length === 0) {
-        throw new Error("No design service created!");
+        return res.status(404).json({
+          error: true,
+          message: "No design service created!",
+        });
       }
       res.json({
         success: true,

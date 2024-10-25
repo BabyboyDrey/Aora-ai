@@ -162,6 +162,7 @@ router.get(
       const foundDesignServices = await designService.find({
         userId: req.user.id,
       });
+      console.log("foundDesignServices:", foundDesignServices);
       if (foundDesignServices.length === 0) {
         return res.status(404).json({
           error: true,

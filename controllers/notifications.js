@@ -16,7 +16,10 @@ router.get(
           createdAt: -1,
         });
       if (userNotifications.length === 0) {
-        throw new Error("No user notifications");
+        return res.status(404).json({
+          error: true,
+          message: "No user notifications",
+        });
       }
       res.json({
         success: true,

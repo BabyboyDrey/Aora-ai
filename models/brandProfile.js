@@ -5,84 +5,97 @@ const trendAnalysisSectionSchema = new mongoose.Schema({
   points: [String],
 });
 
+// psychographic: [String],
+// beliefs: [String],
+// fears: [String],
+// interests: [String],
+// shopping_behavior: [String],
+// challenges: [String],
+// goals: [String],
+
 const personaSchema = new mongoose.Schema({
   name: String,
   background: [String],
   location: String,
   occupation: String,
-  psychographic: [String],
-  beliefs: [String],
-  fears: [String],
-  interests: [String],
-  shopping_behavior: [String],
-  challenges: [String],
-  goals: [String],
+
+  income: String,
+
+  education: String,
+  family: String,
+  lifestyle: String,
+  valuesAndBeliefs: [String],
+  shoppingBehaviour: [String],
 });
 
 const pricingAnalysisSchema = new mongoose.Schema({
-  marketResearch: {
-    marketSize: Number,
-    marketGrowthRate: Number,
-    customerSegments: String,
-    economicConditions: String,
+  targetMarketAndPriceSensitivity: {
+    primaryAudience: String,
+    priceSensitivity: String,
   },
-  competitorPricing: [
-    {
-      competitorName: String,
-      pricePoints: [Number],
-      pricingModel: String,
-      discountingPractices: String,
-    },
-  ],
-  costStructure: {
-    costOfGoodsSold: Number,
-    fixedCosts: Number,
-    variableCosts: Number,
-    breakEvenPoint: Number,
-  },
-  pricingObjectives: {
-    profitabilityGoals: String,
-    marketShareGoals: String,
-    customerValuePerception: String,
-  },
-  pricingStrategies: [
-    {
-      strategyType: String,
-      description: String,
-    },
-  ],
-  priceSensitivityAnalysis: {
-    elasticityOfDemand: Number,
-    customerFeedback: String,
-    abTestingResults: String,
-  },
-  legalEthicalConsiderations: {
-    priceDiscrimination: Boolean,
-    antitrustCompliance: Boolean,
-    fairTradePractices: Boolean,
-  },
-  discountingPromotions: [
-    {
-      discountType: String,
-      impactOnBrand: String,
-      profitabilityImpact: Number,
-    },
-  ],
-  pricingImplementation: {
-    pricingCommunication: String,
-    channelPricing: String,
-    monitoringAdjustments: String,
-  },
-  salesProfitability: {
-    salesForecasting: String,
-    profitMargin: Number,
-    revenueImpact: Number,
-  },
-  riskAnalysis: {
-    marketRisks: String,
-    customerRisks: String,
-    operationalRisks: String,
-  },
+  // marketResearch: {
+  //   marketSize: Number,
+  //   marketGrowthRate: Number,
+  //   customerSegments: String,
+  //   economicConditions: String,
+  // },
+  // competitorPricing: [
+  //   {
+  //     competitorName: String,
+  //     pricePoints: [Number],
+  //     pricingModel: String,
+  //     discountingPractices: String,
+  //   },
+  // ],
+  // costStructure: {
+  //   costOfGoodsSold: Number,
+  //   fixedCosts: Number,
+  //   variableCosts: Number,
+  //   breakEvenPoint: Number,
+  // },
+  // pricingObjectives: {
+  //   profitabilityGoals: String,
+  //   marketShareGoals: String,
+  //   customerValuePerception: String,
+  // },
+  // pricingStrategies: [
+  //   {
+  //     strategyType: String,
+  //     description: String,
+  //   },
+  // ],
+  // priceSensitivityAnalysis: {
+  //   elasticityOfDemand: Number,
+  //   customerFeedback: String,
+  //   abTestingResults: String,
+  // },
+  // legalEthicalConsiderations: {
+  //   priceDiscrimination: Boolean,
+  //   antitrustCompliance: Boolean,
+  //   fairTradePractices: Boolean,
+  // },
+  // discountingPromotions: [
+  //   {
+  //     discountType: String,
+  //     impactOnBrand: String,
+  //     profitabilityImpact: Number,
+  //   },
+  // ],
+  // pricingImplementation: {
+  //   pricingCommunication: String,
+  //   channelPricing: String,
+  //   monitoringAdjustments: String,
+  // },
+  // salesProfitability: {
+  //   salesForecasting: String,
+  //   profitMargin: Number,
+  //   revenueImpact: Number,
+  // },
+  // riskAnalysis: {
+  //   marketRisks: String,
+  //   customerRisks: String,
+  //   operationalRisks: String,
+  // },
 });
 
 const brandProfileSchema = new mongoose.Schema(

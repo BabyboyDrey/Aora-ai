@@ -152,6 +152,8 @@ router.get(
   })
 );
 
+//edited
+
 router.get(
   "/create-brand-customer-personas/:id",
   userAuth,
@@ -188,6 +190,14 @@ router.get(
       const readableText = formatTrendAnalysis(found_profile.trend_analysis);
       console.log("Formatted Trend Analysis:", readableText);
 
+      // - psychographic (a list of psychographic traits)
+      // - beliefs (a list of beliefs)
+      // - fears (a list of fears)
+      // - interests (a list of interests)
+      // - shopping_behavior (a list of shopping behaviors)
+      // - challenges (a list of challenges)
+      // - goals (a list of goals)
+
       const prompt = `
       Create 3 distinct and realistic customer personas for the ${found_profile.industry} industry using the following trend analysis as a crucial data source. 
       The personas should be structured in JSON format with the following keys:
@@ -195,13 +205,12 @@ router.get(
       - background
       - location
       - occupation
-      - psychographic (a list of psychographic traits)
-      - beliefs (a list of beliefs)
-      - fears (a list of fears)
-      - interests (a list of interests)
-      - shopping_behavior (a list of shopping behaviors)
-      - challenges (a list of challenges)
-      - goals (a list of goals)
+      - income
+      - education
+      - family
+      - lifestyle
+      - valuesAndBeliefs (a list of values and beliefs)
+      - shoppingBehaviour (a list of shopping behaviour)
 
       Please wrap the JSON output between the delimiters "START_JSON" and "END_JSON".
 
@@ -369,6 +378,54 @@ router.post(
   })
 );
 
+// 1. marketResearch (object):
+// - marketSize (Number)
+// - marketGrowthRate (Number)
+// - customerSegments (String)
+// - economicConditions (String)
+// 2. competitorPricing (Array of objects):
+// - competitorName(String)
+// - pricePoints (Array of numbers)
+// - pricingModel (String),
+// - discountingPractices (String)
+// 3. costStructure (object):
+// - costOfGoodsSold (Number)
+// - fixedCosts (Number)
+// - variableCosts (Number)
+// - breakEvenPoint (Number)
+// 4. pricingObjectives (object):
+// - profitabilityGoals (String)
+// - marketShareGoals (String)
+// - customerValuePerception (String)
+// 5. pricingStrategies (Array of objects):
+// - strategyType (String)
+// - description (String)
+// 6. priceSensitivityAnalysis (object):
+// - elasticityOfDemand (Number)
+// - customerFeedback (String)
+// - abTestingResults (String)
+// 7. legalEthicalConsiderations (object):
+// - priceDiscrimination (Boolean)
+// - antitrustCompliance (Boolean)
+// - fairTradePractices (Boolean)
+// 8. discountingPromotions (Array of objects):
+// - discountType (String)
+// - impactOnBrand (String)
+// - profitabilityImpact (Number)
+// 9. pricingImplementation (object):
+// - pricingCommunication (String)
+// - channelPricing (String)
+// - monitoringAdjustments (String)
+// 10. salesProfitability (object):
+// - salesForecasting (String)
+// - profitMargin (Number)
+// - revenueImpact (Number)
+// 11. riskAnalysis (object):
+// - marketRisks (String)
+// - customerRisks (String)
+// - operationalRisks (String)
+const r = "r";
+// edited
 router.get(
   "/set-pricing-analysis/:id",
   userAuth,
@@ -407,61 +464,45 @@ router.get(
           formattedOutput += `**Occupation:** ${customerPersona.occupation}\n\n`;
         }
 
-        if (customerPersona.psychographic.length > 0) {
-          formattedOutput += `**Psychographic:**\n`;
-          customerPersona.psychographic.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.income.length > 0) {
+          formattedOutput += `**Income:** ${customerPersona.income}\n\n`;
         }
 
-        if (customerPersona.beliefs.length > 0) {
-          formattedOutput += `**Beliefs:**\n`;
-          customerPersona.beliefs.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.education.length > 0) {
+          formattedOutput += `**Education:** ${customerPersona.education}\n\n`;
         }
 
-        if (customerPersona.fears.length > 0) {
-          formattedOutput += `**Fears:**\n`;
-          customerPersona.fears.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.family.length > 0) {
+          formattedOutput += `**Family:** ${customerPersona.family}\n\n`;
         }
 
-        if (customerPersona.interests.length > 0) {
-          formattedOutput += `**Interests:**\n`;
-          customerPersona.interests.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.lifestyle.length > 0) {
+          formattedOutput += `**Lifestyle:** ${customerPersona.lifestyle}\n\n`;
         }
 
-        if (customerPersona.shopping_behavior.length > 0) {
+        if (customerPersona.shoppingBehaviour.length > 0) {
           formattedOutput += `**Shopping Behavior:**\n`;
-          customerPersona.shopping_behavior.forEach((item) => {
+          customerPersona.shoppingBehaviour.forEach((item) => {
             formattedOutput += `- ${item.trim()}\n`;
           });
           formattedOutput += `\n`;
         }
 
-        if (customerPersona.challenges.length > 0) {
-          formattedOutput += `**Challenges:**\n`;
-          customerPersona.challenges.forEach((item) => {
+        if (customerPersona.valuesAndBeliefs.length > 0) {
+          formattedOutput += `**Values and Beliefs:**\n`;
+          customerPersona.valuesAndBeliefs.forEach((item) => {
             formattedOutput += `- ${item.trim()}\n`;
           });
           formattedOutput += `\n`;
         }
 
-        if (customerPersona.goals.length > 0) {
-          formattedOutput += `**Goals:**\n`;
-          customerPersona.goals.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
-        }
+        // if (customerPersona.goals.length > 0) {
+        //   formattedOutput += `**Goals:**\n`;
+        //   customerPersona.goals.forEach((item) => {
+        //     formattedOutput += `- ${item.trim()}\n`;
+        //   });
+        //   formattedOutput += `\n`;
+        // }
 
         return formattedOutput.trim();
       }
@@ -474,52 +515,10 @@ router.get(
       const prompt = `
       Create one distinct and realistic pricing analysis for the ${brandProfile.industry} industry using the following customer persona as a crucial data source. 
       The analysis should be structured in JSON format with the following keys:
-      1. marketResearch (object):
-       - marketSize (Number)
-       - marketGrowthRate (Number)
-       - customerSegments (String)
-       - economicConditions (String)
-      2. competitorPricing (Array of objects):
-       - competitorName(String)
-       - pricePoints (Array of numbers)
-       - pricingModel (String),
-       - discountingPractices (String)
-      3. costStructure (object):
-       - costOfGoodsSold (Number)
-       - fixedCosts (Number)
-       - variableCosts (Number)
-       - breakEvenPoint (Number)
-      4. pricingObjectives (object):
-       - profitabilityGoals (String)
-       - marketShareGoals (String)
-       - customerValuePerception (String)
-      5. pricingStrategies (Array of objects):
-       - strategyType (String)
-       - description (String)
-      6. priceSensitivityAnalysis (object):
-       - elasticityOfDemand (Number)
-       - customerFeedback (String)
-       - abTestingResults (String)
-      7. legalEthicalConsiderations (object):
-       - priceDiscrimination (Boolean)
-       - antitrustCompliance (Boolean)
-       - fairTradePractices (Boolean)
-      8. discountingPromotions (Array of objects):
-       - discountType (String)
-       - impactOnBrand (String)
-       - profitabilityImpact (Number)
-      9. pricingImplementation (object):
-       - pricingCommunication (String)
-       - channelPricing (String)
-       - monitoringAdjustments (String)
-      10. salesProfitability (object):
-       - salesForecasting (String)
-       - profitMargin (Number)
-       - revenueImpact (Number)
-      11. riskAnalysis (object):
-       - marketRisks (String)
-       - customerRisks (String)
-       - operationalRisks (String)
+     1. targetMarketAndPriceSensitivity (Object)
+     - primaryAudience (String: a list of primary audience characteristics)
+     - priceSensitivity (String: a list of pricing sensitivty characteristics) 
+   
 
       Please wrap the JSON output between the delimiters "START_JSON" and "END_JSON".
 

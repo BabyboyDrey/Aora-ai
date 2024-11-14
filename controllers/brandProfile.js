@@ -516,8 +516,8 @@ router.get(
       Create one distinct and realistic pricing analysis for the ${brandProfile.industry} industry using the following customer persona as a crucial data source. 
       The analysis should be structured in JSON format with the following keys:
      1. targetMarketAndPriceSensitivity (Object)
-     - primaryAudience (String: a list of primary audience characteristics)
-     - priceSensitivity (String: a list of pricing sensitivty characteristics) 
+     - primaryAudience (A String of primary audience characteristics)
+     - priceSensitivity (A String of pricing sensitivty characteristics) 
    
 
       Please wrap the JSON output between the delimiters "START_JSON" and "END_JSON".

@@ -668,64 +668,49 @@ router.post(
           formattedOutput += `**Occupation:** ${customerPersona.occupation}\n\n`;
         }
 
-        if (customerPersona.psychographic.length > 0) {
-          formattedOutput += `**Psychographic:**\n`;
-          customerPersona.psychographic.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.income.length > 0) {
+          formattedOutput += `**Income:** ${customerPersona.income}\n\n`;
         }
 
-        if (customerPersona.beliefs.length > 0) {
-          formattedOutput += `**Beliefs:**\n`;
-          customerPersona.beliefs.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.education.length > 0) {
+          formattedOutput += `**Education:** ${customerPersona.education}\n\n`;
         }
 
-        if (customerPersona.fears.length > 0) {
-          formattedOutput += `**Fears:**\n`;
-          customerPersona.fears.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.family.length > 0) {
+          formattedOutput += `**Family:** ${customerPersona.family}\n\n`;
         }
 
-        if (customerPersona.interests.length > 0) {
-          formattedOutput += `**Interests:**\n`;
-          customerPersona.interests.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
+        if (customerPersona.lifestyle.length > 0) {
+          formattedOutput += `**Lifestyle:** ${customerPersona.lifestyle}\n\n`;
         }
 
-        if (customerPersona.shopping_behavior.length > 0) {
+        if (customerPersona.shoppingBehaviour.length > 0) {
           formattedOutput += `**Shopping Behavior:**\n`;
-          customerPersona.shopping_behavior.forEach((item) => {
+          customerPersona.shoppingBehaviour.forEach((item) => {
             formattedOutput += `- ${item.trim()}\n`;
           });
           formattedOutput += `\n`;
         }
 
-        if (customerPersona.challenges.length > 0) {
-          formattedOutput += `**Challenges:**\n`;
-          customerPersona.challenges.forEach((item) => {
+        if (customerPersona.valuesAndBeliefs.length > 0) {
+          formattedOutput += `**Values and Beliefs:**\n`;
+          customerPersona.valuesAndBeliefs.forEach((item) => {
             formattedOutput += `- ${item.trim()}\n`;
           });
           formattedOutput += `\n`;
         }
 
-        if (customerPersona.goals.length > 0) {
-          formattedOutput += `**Goals:**\n`;
-          customerPersona.goals.forEach((item) => {
-            formattedOutput += `- ${item.trim()}\n`;
-          });
-          formattedOutput += `\n`;
-        }
+        // if (customerPersona.goals.length > 0) {
+        //   formattedOutput += `**Goals:**\n`;
+        //   customerPersona.goals.forEach((item) => {
+        //     formattedOutput += `- ${item.trim()}\n`;
+        //   });
+        //   formattedOutput += `\n`;
+        // }
 
         return formattedOutput.trim();
       }
+
       const readableCustomerPersonaText = formatCustomerPersona(
         brandProfile.selected_customer_persona
       );

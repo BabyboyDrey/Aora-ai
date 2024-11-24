@@ -879,7 +879,6 @@ router.get(
     try {
       const { id } = req.params;
 
-      // Fetch the Brand Profile based on the user and provided ID
       const brandProfile = await Brandprofile.findOne({
         userId: req.user.id,
         _id: id,
@@ -892,7 +891,6 @@ router.get(
         });
       }
 
-      // Format the customer persona for the AI prompt
       function formatCustomerPersona(customerPersona) {
         let formattedOutput = `**Customer Persona: ${customerPersona.name}**\n\n`;
 
@@ -951,7 +949,6 @@ router.get(
         brandProfile.selected_customer_persona
       );
 
-      // AI Prompt to generate the MTP
       const prompt = `
       Based on the customer persona and target market, generate a realistic and concrete Massive Transformational Purpose (MTP) for ${brandProfile.company_name}. 
       The MTP should be structured in JSON format with the following keys:

@@ -711,6 +711,7 @@ router.post(
 
         return formattedOutput.trim();
       }
+
       const readableCustomerPersonaText = formatCustomerPersona(
         brandProfile.selected_customer_persona
       );
@@ -854,6 +855,182 @@ router.post(
                 "Failed to parse JSON response: " + finalJsonParseError.message,
             });
           }
+        }
+      } else {
+        return res.status(500).json({
+          error: true,
+          message: "Failed to extract JSON from the response",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: true,
+        message: err.message,
+      });
+    }
+  })
+);
+//../
+router.get(
+  "/create-mtp-without-user-input/:id",
+  userAuth,
+  asyncErrCatcher(async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Fetch the Brand Profile based on the user and provided ID
+      const brandProfile = await Brandprofile.findOne({
+        userId: req.user.id,
+        _id: id,
+      });
+
+      if (!brandProfile) {
+        return res.status(404).json({
+          error: true,
+          message: "Brand profile or customer persona not found.",
+        });
+      }
+
+      // Format the customer persona for the AI prompt
+      function formatCustomerPersona(customerPersona) {
+        let formattedOutput = `**Customer Persona: ${customerPersona.name}**\n\n`;
+
+        if (customerPersona.background.length > 0) {
+          formattedOutput += `**Background:**\n`;
+          customerPersona.background.forEach((item) => {
+            formattedOutput += `- ${item.trim()}\n`;
+          });
+          formattedOutput += `\n`;
+        }
+
+        if (customerPersona.location) {
+          formattedOutput += `**Location:** ${customerPersona.location}\n\n`;
+        }
+
+        if (customerPersona.occupation) {
+          formattedOutput += `**Occupation:** ${customerPersona.occupation}\n\n`;
+        }
+
+        if (customerPersona.income.length > 0) {
+          formattedOutput += `**Income:** ${customerPersona.income}\n\n`;
+        }
+
+        if (customerPersona.education.length > 0) {
+          formattedOutput += `**Education:** ${customerPersona.education}\n\n`;
+        }
+
+        if (customerPersona.family.length > 0) {
+          formattedOutput += `**Family:** ${customerPersona.family}\n\n`;
+        }
+
+        if (customerPersona.lifestyle.length > 0) {
+          formattedOutput += `**Lifestyle:** ${customerPersona.lifestyle}\n\n`;
+        }
+
+        if (customerPersona.shoppingBehaviour.length > 0) {
+          formattedOutput += `**Shopping Behavior:**\n`;
+          customerPersona.shoppingBehaviour.forEach((item) => {
+            formattedOutput += `- ${item.trim()}\n`;
+          });
+          formattedOutput += `\n`;
+        }
+
+        if (customerPersona.valuesAndBeliefs.length > 0) {
+          formattedOutput += `**Values and Beliefs:**\n`;
+          customerPersona.valuesAndBeliefs.forEach((item) => {
+            formattedOutput += `- ${item.trim()}\n`;
+          });
+          formattedOutput += `\n`;
+        }
+
+        return formattedOutput.trim();
+      }
+
+      const readableCustomerPersonaText = formatCustomerPersona(
+        brandProfile.selected_customer_persona
+      );
+
+      // AI Prompt to generate the MTP
+      const prompt = `
+      Based on the customer persona and target market, generate a realistic and concrete Massive Transformational Purpose (MTP) for ${brandProfile.company_name}. 
+      The MTP should be structured in JSON format with the following keys:
+
+      1. what_do_your_brand_care_about_and_why (String)
+      2. what_is_yuor_brand_purpose (String)
+      3. what_does_the_world_need_from_your_industry_and_why (String)
+      4. what_would_you_do_if_you_couldnt_fail_and_why (String)
+      5. what_would_we_do_if_we_received_a_billion_dollars_today_and_why (String)
+
+      Please wrap the JSON output between the delimiters "START_JSON" and "END_JSON".
+
+      Customer persona: ${readableCustomerPersonaText}
+      Target market: ${brandProfile.target_market}
+
+      Please return the response strictly in JSON format between the specified delimiters without any additional text or explanations.
+      `;
+
+      const client = new ZhipuAI(process.env.ZHIPU_APP_KEY);
+      let response;
+
+      try {
+        response = await client.chatCompletions(
+          "glm-4",
+          [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          {
+            max_tokens: 1000,
+            temperature: 0.7,
+            top_p: 0.9,
+          }
+        );
+      } catch (err) {
+        console.error("Failed to get response:", err);
+        return res.status(500).json({
+          error: true,
+          message: "Failed to get response: " + err,
+        });
+      }
+
+      console.log("AI Response:", response.choices[0].message.content.trim());
+      let cleanedMessage = response.choices[0].message.content.trim();
+      let jsonContent = cleanedMessage.match(/START_JSON([\s\S]*?)END_JSON/);
+      if (jsonContent) {
+        try {
+          const jsonResponse = JSON.parse(jsonContent[1].trim());
+          console.log("Structured Data:", jsonResponse);
+          brandProfile.massive_transformational_purpose = jsonResponse;
+          brandProfile.suggestions_for_mtp = jsonResponse;
+
+          await brandProfile.save();
+          await notifications.create({
+            userId: req.user.id,
+            brief: "Created brand profile's mtp",
+            briefModelType: "Brand profile",
+            idOfCausingActivity: brandProfile._id,
+          });
+          console.log(
+            "mtp:",
+            brandProfile.massive_transformational_purpose,
+            "suggestions:",
+            brandProfile.suggestions_for_mtp
+          );
+          res.json({
+            message: "Massive Transformational Purpose created successfully",
+            mtp: jsonResponse,
+            brandProfile,
+          });
+        } catch (jsonParseError) {
+          console.error("Failed to parse JSON:", jsonParseError);
+
+          return res.status(500).json({
+            error: true,
+            message: "Failed to parse JSON response: " + jsonParseError.message,
+          });
         }
       } else {
         return res.status(500).json({

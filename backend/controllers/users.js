@@ -33,6 +33,12 @@ router.post(
   asyncErrCatcher(async (req, res) => {
     try {
       const items = req.body;
+      console.log("items:", items, req.body);
+      if (!items)
+        return res.status(400).json({
+          error: true,
+          message: "Please provide request body!",
+        });
       let found_user;
       if (items.phone_number) {
         found_user = await Users.findOne({ phone_number: items.phone_number });
@@ -55,6 +61,7 @@ router.post(
           });
         }
       }
+      console.log("found_user:", found_user);
       await deletePreviousSessions(found_user._id);
 
       const validated = await bcrypt.compare(
